@@ -6,7 +6,7 @@ BASEDIR=$(dirname "$0")
 
 if [ ! -d "./build" ]; then 
     mkdir build
-    printf "[dak-script] ${GREEN}Creating build directory${NC}\n"
+    printf "[dak_script] ${GREEN}Creating build directory${NC}\n"
 fi
 
 RUN_CMAKE=0
@@ -16,7 +16,7 @@ RUN_CMAKE=0
 cd ${BASEDIR}/build
 
 
-printf "[dak-script] ${GREEN}Running Cmake${NC}\n"
+printf "[dak_script] ${GREEN}Running Cmake${NC}\n"
 cmake ..
 
 make 

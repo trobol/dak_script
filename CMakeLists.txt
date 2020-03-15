@@ -1,7 +1,7 @@
 #h ttps://cliutils.gitlab.io/modern-cmake/chapters/basics/structure.html
 # https://gitlab.com/CLIUtils/modern-cmake/-/blob/master/examples/extended-project/CMakeLists.txt
 cmake_minimum_required(VERSION 3.13)
-project(dak-script)
+project(dak_script)
 
 
 # FetchContent added in CMake 3.11, downloads during the configure step
@@ -37,7 +37,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	#add_subdirectory(docs)
     #else()
 	#message(STATUS "Doxygen not found, not building docs")
-    #endif()
+   # endif()
 endif()
 
 
