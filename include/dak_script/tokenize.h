@@ -5,12 +5,33 @@
 #include "mapped_file.h"
 
 #include <vector>
+#include "lexetize.h"
 
 
 namespace dak::script {
 
+    enum struct token_type {
+        reserved,
+        identifier,
+        literal,
+        typename
+    }
+
+    enum struct reserved_token {
+
+    }
+
+    struct token
+    {
+        token_type type;
+        union {
+            reserved_token reserved;
+            uint32_t stringIndex;
+        }
+    };
+    
 	
-    std::vector<Token> tokenize(const char* file, size_t length);
+    std::vector<Token> tokenize(std::vector<lexeme> lexemes);
 }
 
 
