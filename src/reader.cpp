@@ -16,9 +16,7 @@ namespace dak::script
 
 void Reader::open(std::string name)
 {
-    char buff[FILENAME_MAX];
-    getcwd(buff, FILENAME_MAX);
-    std::cout << buff << std::endl;
+    
     m_contents = map_file(name.c_str(), m_length);
 }
 
@@ -33,7 +31,7 @@ const char *Reader::map_file(const char *fname, size_t &length)
 {
     int fd = ::open(fname, O_RDONLY);
 
-    if (fd == -1)
+    if (fd == -1) 
         std::cout << "failed to open: " << fname << "\n";
 
     // obtain file size

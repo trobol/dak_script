@@ -19,6 +19,8 @@ namespace dak::script {
             size_t length() {
                 return m_length;
             }
+
+            
         private:
             size_t m_length;
             const char* m_contents;

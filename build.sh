@@ -17,7 +17,7 @@ cd ${BASEDIR}/build
 
 
 printf "[dak_script] ${GREEN}Running Cmake${NC}\n"
-cmake -G "Unix Makefiles"..
+cmake -G "Unix Makefiles" ..
 
 make 
 
