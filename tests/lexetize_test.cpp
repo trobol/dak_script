@@ -7,27 +7,26 @@
 
 using namespace dak::script;
 
+const const char *expected_lexemes[] = {"class", "TestComponent", "extends", "Component", "{",
+                                        "public", "int", "a", "=", "0", ";",
+                                        "public", "bool", "b", ";",
+                                        "float", "c", ";",
+                                        "hook", "function", "(", "int", "p", ")", "{",
+                                        "float", "d", "=", "10", ";",
+                                        "d", "+=", "5", ";",
+                                        "string", "asd", "=", "\"hello\"", ";",
+                                        "if", "(", "d", "&&", "des", ")",
+                                        "return", "test", ";",
+                                        "for", "(", "int", "i", "=", "0", ";", "i", "<", "20", ";", "i", "++", ")",
+                                        "{",
+                                        "\"\\\"\"",
+                                        "}",
+                                        "0x1230",
+                                        "}",
+                                        "}"};
 
-std::string get_type_str(lexeme_type type) {
-    switch (type)
-    {
-        case lexeme_type::unknown:
-            return "unknown";
-        case lexeme_type::operation:
-            return "operation";
-        case lexeme_type::word:
-            return "word";
-        case lexeme_type::control:
-            return "control";
-        default:
-            break;
-    }
-}
-
-
-
-TEST_CASE( "Lexetize Text", "[main]" ) {
-    
+TEST_CASE("Lexetize Text", "[main]")
+{
 
     Reader reader;
 
@@ -35,14 +34,13 @@ TEST_CASE( "Lexetize Text", "[main]" ) {
 
     std::vector<lexeme> lexemes = lexetize(reader.contents(), reader.length());
 
+    for (int i = 0; i < lexemes.size(); i++)
+    {
 
-    for(int i = 0; i < lexemes.size(); i++) {
-        
-        for(int j = 0; j < lexemes[i].length; j++) {
+        for (int j = 0; j < lexemes[i].length; j++)
+        {
             std::cout << lexemes[i].ptr[j];
+            REQUIRE(lexemes[i].ptr[j] == expected_lexemes[i][j]);
         }
-        std::cout << " : " << get_type_str(lexemes[i].type) << '\n';
     }
-
 }
-

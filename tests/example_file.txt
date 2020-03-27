@@ -18,6 +18,5 @@ class TestComponent extends Component{
             Multi line comment
         */
     }
-
 }
  
