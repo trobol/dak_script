@@ -3,26 +3,27 @@
 
 #include <vector>
 
-namespace dak::script {
+namespace dak::script
+{
 
-    enum struct lexeme_type {
-        unknown,
-        operation,
-        word,
-        control
-    };
+enum struct lexeme_type
+{
+    unknown,
+    operation,
+    word,
+    control,
+    literal
+};
 
+struct lexeme
+{
+    const char *ptr;
+    size_t length;
+    lexeme_type type;
+};
 
-    struct lexeme {
-        const char* ptr;
-        size_t length;
-        lexeme_type type;
-    };
+std::vector<lexeme> lexetize(const char *contents, size_t length);
 
-  
-    std::vector<lexeme> lexetize(const char* contents, size_t length);
-
-}
-
+} // namespace dak::script
 
 #endif

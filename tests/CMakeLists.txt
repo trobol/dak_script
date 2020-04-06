@@ -16,4 +16,4 @@ add_executable(dak_script_test ${SOURCE_FILES})
 include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
 target_link_libraries(dak_script_test PRIVATE dak_script Catch2::Catch2)
 
-catch_discover_tests(dak_script_test)
+catch_discover_tests(dak_script_test WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

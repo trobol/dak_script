@@ -7,7 +7,7 @@ using namespace dak::script;
 
 TEST_CASE( "reads contents correctly", "[reader]" ) {
 	Reader reader;
-   	reader.open("./tests/example_file.txt");
+   	reader.open("tests/example_file.txt");
 
 	REQUIRE(reader.length() == expected_text_length);
 

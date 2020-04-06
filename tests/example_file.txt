@@ -4,7 +4,7 @@ class TestComponent extends Component{
     float c;
     //testing testing
     
-    hook function(int p) {
+    hook OnHook(int p) {
         float d = 10;
         d += 5;
         string asd = "hello";
