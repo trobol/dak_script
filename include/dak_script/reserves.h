@@ -9,18 +9,17 @@ namespace dak::script
 
 enum struct keywords
 {
-	kw_public,
-	kw_private,
-	kw_hook,
-	kw_function,
-	kw_class,
-	kw_extends,
+	KEYWORD_PUBLIC,
+	KEYWORD_PRIVATE,
+	KEYWORD_function,
+	KEYWORD_class,
+	KEYWORD_extends,
 
-	kw_if,
-	kw_else,
+	KEYWORD_if,
+	KEYWORD_else,
 
-	kw_return,
-	kw_for
+	KEYWORD_return,
+	KEYWORD_for
 };
 
 enum struct operations

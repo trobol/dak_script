@@ -1,21 +1,39 @@
-class TestComponent extends Component{
-    public int a = 0;
-    public bool b;
-    float c;
-    //testing testing
-    
-    hook OnHook(int p) {
-        float d = 10;
-        d += 5;
-        string asd = "hello";
-        if (d && des)
-            return test;
-        for (int i = 0; i < 20; i++) {
-            "\""
-        }
-        0x1230
-        /*
-            Multi line comment
-        */
-    }
+type Test struct {
+    hi: bool
+    test: float = 1
 }
+
+//Test member function 'test_function' with parameter 'val' of type float that returns two floats
+func (r: Test) test_function(val: float) (float, float) {
+
+}
+
+
+a : Test //variable a of type Test default initialized
+b : Test = Test{} //default initialized with explicit type
+c := Test{} // default initialized with deduced type
+
+
+e : Test = uninitialized //uninitialized with explicit type
+f := Test{uninitialized} //uninitialized with deduced type
+d := uninitialized //uninitialized with deduced type from later usage
+
+
+ptr := null //
+ptr2 : *Test = null
+array : []Test
+
+ptr = &e //get location
+
+
+/*
+
+    Block Comment
+    /*
+    Nested Block Comment
+    */
+
+*/
+
+
+// Single line comment

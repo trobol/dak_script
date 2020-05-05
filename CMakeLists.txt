@@ -1,4 +1,4 @@
-#h ttps://cliutils.gitlab.io/modern-cmake/chapters/basics/structure.html
+# https://cliutils.gitlab.io/modern-cmake/chapters/basics/structure.html
 # https://gitlab.com/CLIUtils/modern-cmake/-/blob/master/examples/extended-project/CMakeLists.txt
 cmake_minimum_required(VERSION 3.13)
 project(dak_script)

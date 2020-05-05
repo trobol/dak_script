@@ -3,21 +3,19 @@
 
 namespace dak::script
 {
-enum struct character_type
+enum Character_Type
 {
-	letter,
-	number,
-	bracket,
-	whitespace,
-	operation,
-	quotation,
-	unknown,
-	newline,
-	punctuation,
-
+	CHARACTER_TYPE_LETTER,
+	CHARACTER_TYPE_NUMBER,
+	CHARACTER_TYPE_SPACE,
+	CHARACTER_TYPE_BREAK,
+	CHARACTER_TYPE_OTHER
 };
 
-character_type get_character_type(char c);
+Character_Type get_character_type(char c);
+
+bool is_identifier_char(char c);
+
 } // namespace dak::script
 
 #endif
