@@ -6,33 +6,53 @@
 
 namespace dak::script
 {
-class Parser;
+	class Parser;
 
-class Lexer
-{
-private:
-	const char *m_data;
-	uint32_t m_size;
-	uint32_t m_index;
+	class Lexer
+	{
+	protected:
+		struct substr
+		{
+			const char *start;
+			uint32_t size;
+		};
 
-	uint32_t m_line_number;
-	uint32_t m_character_number;
+	private:
+		const char *m_data;
+		uint32_t m_size;
+		uint32_t m_index;
 
-	Token parse_identifier();
-	Token parse_slash();
+		uint32_t m_line_number;
+		uint32_t m_character_number;
 
-	Token next();
+		std::vector<substr> m_identifiers;
 
-	char peek_char();
-	void pop_char();
+		std::vector<Token> m_tokens;
 
-	Token make(Token_Type type);
+		std::vector<Token_Pos> m_positions;
 
-public:
-	Lexer(const char *data, size_t size) : m_data{data}, m_size{size}, m_index{0} {};
+		Token parse_identifier();
+		Token parse_slash();
+		Token parse_string_literal();
+		Token parse_char_literal();
+		Token parse_num_literal();
 
-	std::vector<Token> lex();
-};
+		Token next();
+
+		char peek_char();
+		char peek_char(uint32_t);
+		void pop_char();
+
+		void break_line();
+
+		Token make_token(Token_Type);
+		Token make_identifier(const char *, uint32_t);
+
+	public:
+		Lexer(const char *data, size_t size);
+
+		Token_Module lex();
+	};
 } // namespace dak::script
 
 #endif

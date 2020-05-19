@@ -11,7 +11,8 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
     include(cmake/add_FetchContent_MakeAvailable.cmake)
 endif()
 
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --save-temps")
 
 
 # Only do these if this is the main project, and not if it is included through add_subdirectory
