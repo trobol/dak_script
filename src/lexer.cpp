@@ -32,6 +32,13 @@ Token Lexer::make_literal(long long int i)
 	m_literals.push_back(Token_Literal{LITERAL_TYPE_INT, .int_val = (i)});
 	return Token{TOKEN_TYPE_LITERAL, .index = (m_literals.size() - 1)};
 }
+
+
+Token Lexer::make_literal(char* str) {
+	m_literals.push_back(Token_Literal{LITERAL_TYPE_STRING, .string_val = str});
+	return Token{TOKEN_TYPE_LITERAL, .index = (m_literals.size() - 1)};
+}
+
 Lexer::Lexer(const char *data, size_t size)
     : m_data{data}, m_size{size}, m_index{0}, m_character_number{0},
       m_line_number{0} {};
@@ -101,7 +108,7 @@ Token_Module Lexer::lex()
 	}
 
 	return Token_Module{std::move(m_tokens), std::move(m_positions),
-			    std::move(m_literals), buffer, buffer_size};
+			    std::move(m_literals), std::move(m_string_literals), buffer, buffer_size};
 }
 
 Token Lexer::next()
@@ -284,9 +291,9 @@ Token Lexer::parse_string_literal()
 	pop_char();
 	// calculate length
 	size_t size = 0;
-	while (true)
+	for(size_t i = 0; i < 0xfffff; i++)
 	{
-		char c = peek_char(size);
+		char c = peek_char(i);
 		if (c == '"')
 		{
 			break;
@@ -301,7 +308,8 @@ Token Lexer::parse_string_literal()
 		}
 	}
 
-	dak_std::string str(size);
+	char* str = new char[size+1];
+	str[size] = 0;
 	for (size_t i = 0; i < size; ++i)
 	{
 		char c = peek_char();
@@ -311,12 +319,15 @@ Token Lexer::parse_string_literal()
 			c = get_escaped_char(peek_char());
 			if (c == 0)
 			{
+				printf("%c", c);
 				// invalid escape character
-				make_error();
+				return  make_error();
 			}
 		}
 		str[i] = c;
+		pop_char();
 	}
+	return make_literal(str);
 }
 
 Token Lexer::parse_num_literal()

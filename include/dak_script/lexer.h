@@ -3,6 +3,7 @@
 
 #include "token.h"
 #include <vector>
+#include <dak_std/string.h>
 
 namespace dak_script
 {
@@ -26,6 +27,8 @@ private:
 	std::vector<substr> m_identifiers;
 	std::vector<Token_Literal> m_literals;
 
+	std::vector<dak_std::string> m_string_literals;
+
 	std::vector<Token> m_tokens;
 
 	std::vector<Token_Pos> m_positions;
@@ -43,9 +46,9 @@ private:
 	Token make_error();
 
 	Token make_literal(char);
-	Token make_literal(const char *);
 	Token make_literal(double);
 	Token make_literal(long long int);
+	Token make_literal(char*);
 
 	Token next();
 

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
+#include <dak_std/string.h>
 
 class File;
 
@@ -86,7 +87,7 @@ struct Token_Literal
 	Token_Literal_Type type;
 	union {
 		char char_val;
-		dak_std::string string_val;
+        char* string_val;
 		long long int int_val;
 		double float_val;
 	};
@@ -103,6 +104,7 @@ struct Token_Module
 	std::vector<Token> tokens;
 	std::vector<Token_Pos> positions;
 	std::vector<Token_Literal> literals;
+    std::vector<dak_std::string> string_literals;
 	const char *buffer;
 	uint32_t buffer_size;
 };
