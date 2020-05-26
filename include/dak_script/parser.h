@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace dak::script
+namespace dak_script
 {
 
 enum parsed_unit_type
@@ -46,6 +46,6 @@ private:
 	std::unordered_map<std::string, FunctionPointer> functions;
 };
 
-} // namespace dak::script
+} // namespace dak_script
 
 #endif

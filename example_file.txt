@@ -1,6 +1,7 @@
 type Test struct {
     hi: bool
-    test: float = 0b0101
+    test: float = 0b0101,
+    other: string = "hello"
 }
 
 //Test member function 'test_function' with parameter 'val' of type float that returns two floats

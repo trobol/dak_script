@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <string>
 
-namespace dak::script
+namespace dak_script
 {
 
 enum struct keywords
@@ -39,6 +39,6 @@ enum struct operations
 extern std::unordered_map<std::string, keywords> keywords_map;
 extern std::unordered_map<std::string, operations> operations_map;
 
-} // namespace dak::script
+} // namespace dak_script
 
 #endif

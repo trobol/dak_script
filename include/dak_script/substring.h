@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace dak::script {
+namespace dak_script {
     /*
         a string that reuses the memory from the original string
     */

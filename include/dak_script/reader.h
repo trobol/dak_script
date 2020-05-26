@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-namespace dak::script {
+namespace dak_script {
     class Reader {
         public:
 

@@ -10,7 +10,7 @@
 #include <Windows.h>
 #endif
 
-namespace dak::script
+namespace dak_script
 {
 #ifdef __unix__
 mmapped_file map_file(file_descriptor fd)
@@ -38,4 +38,4 @@ int unmap_file(mmapped_file file)
 #elif defined(WIN32) || defined(_WIN32)
 
 #endif
-} // namespace dak::script
+} // namespace dak_script

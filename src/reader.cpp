@@ -11,7 +11,7 @@
 #endif
 
 // https://stackoverflow.com/questions/17925051/fast-textfile-reading-in-c
-namespace dak::script {
+namespace dak_script {
 
 void Reader::open(std::string name) {
 
@@ -54,4 +54,4 @@ void Reader::unmap_file(void *addr, size_t length) {}
 
 #endif
 
-} // namespace dak::script
+} // namespace dak_script

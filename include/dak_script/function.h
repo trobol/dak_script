@@ -1,7 +1,7 @@
 #ifndef _DAK_SCRIPT_FUNCTION_H
 #define _DAK_SCRIPT_FUNCTION_H
 
-namespace dak::script {
+namespace dak_script {
     class Function {
         private:
             

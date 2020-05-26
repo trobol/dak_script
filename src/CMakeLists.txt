@@ -2,6 +2,11 @@
 file(GLOB_RECURSE SOURCE_FILES "./*.cpp")
 list(REMOVE_ITEM SOURCE_FILES "main.cpp")
 
+option(ADD_PROFILING "ADD_PROFILING" OFF)
+    if(ADD_PROFILING)
+    message(STATUS "profiling enabled")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+endif()
 
 
 # Make an automatic library - will be static or dynamic based on user setting
@@ -24,7 +29,7 @@ source_group(TREE "${PROJECT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${
 add_custom_target(profile
 
     COMMAND ${CMAKE_INSTALL_PREFIX}/bin/compile ../example_file.txt
-    COMMAND gprof ${CMAKE_INSTALL_PREFIX}/bin/compile gmon.out > analysis.txt
+    COMMAND gprof ${CMAKE_INSTALL_PREFIX}/bin/compile gmon.out | gprof2dot | dot -Tpng -o output.png
 
     COMMENT "profiling compile"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

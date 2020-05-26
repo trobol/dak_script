@@ -4,7 +4,7 @@
 #include <dak_script/file_descriptor.h>
 #include <string>
 
-namespace dak::script
+namespace dak_script
 {
 
 struct mmapped_file
@@ -20,6 +20,6 @@ mmapped_file map_file(file_descriptor fd, size_t length);
 
 int unmap_file(mmapped_file file);
 
-} // namespace dak::script
+} // namespace dak_script
 
 #endif

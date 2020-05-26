@@ -9,7 +9,7 @@
 #include <Windows.h>
 #endif
 
-namespace dak::script {
+namespace dak_script {
 #ifdef __unix__
 
 file_descriptor file_open(std::string path, file_mode mode) {
@@ -48,4 +48,4 @@ size_t len(file_descriptor handle);
 
 #endif
 
-} // namespace dak::script
+} // namespace dak_script

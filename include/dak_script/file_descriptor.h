@@ -2,7 +2,7 @@
 #define _DAK_SCRIPT_FILE_HANDLE_H
 #include <string>
 
-namespace dak::script
+namespace dak_script
 {
 
 enum file_mode
@@ -21,6 +21,6 @@ int file_close(file_descriptor fd);
 
 size_t len(file_descriptor fd);
 
-} // namespace dak::script
+} // namespace dak_script
 
 #endif

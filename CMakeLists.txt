@@ -30,6 +30,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # Note this needs to be done in the main CMakeLists
     # since it calls enable_testing, which must be in the
     # main CMakeLists.
+    option(BUILD_TESTING "" OFF)
     include(CTest)
 
     # Docs only available if this is the main app
@@ -38,7 +39,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	#add_subdirectory(docs)
     #else()
 	#message(STATUS "Doxygen not found, not building docs")
-   # endif()
+    #endif()
 endif()
 
 
@@ -53,16 +54,14 @@ if(EXISTS "${LOC_PATH}")
     message(FATAL_ERROR "You cannot build in a source directory (or any directory with a CMakeLists.txt file). Please use the build script. Feel free to remove CMakeCache.txt and CMakeFiles.")
 endif()
 
+
+
 add_subdirectory(src)
 
 
-option(ADD_PROFILING "ADD_PROFILING" OFF)
-if(ADD_PROFILING)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-endif()
 
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING) AND BUILD_TESTING)
     add_subdirectory(tests)
-    message("tests enabled")
+    message(STATUS "tests enabled")
 endif()
 

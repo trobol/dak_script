@@ -1,6 +1,6 @@
 #include <dak_script/character_type.h>
 
-namespace dak::script
+namespace dak_script
 {
 
 bool is_identifer_char(char c)
@@ -154,4 +154,4 @@ Character_Type get_character_type(char c)
 		return CHARACTER_TYPE_OTHER;
 	}
 }
-} // namespace dak::script
+} // namespace dak_script

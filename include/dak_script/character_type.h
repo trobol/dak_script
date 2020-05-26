@@ -1,7 +1,7 @@
 #ifndef _DAK_SCRIPT_CHARACTER_TYPE_H
 #define _DAK_SCRIPT_CHARACTER_TYPE_H
 
-namespace dak::script
+namespace dak_script
 {
 enum Character_Type
 {
@@ -16,6 +16,6 @@ Character_Type get_character_type(char c);
 
 bool is_identifier_char(char c);
 
-} // namespace dak::script
+} // namespace dak_script
 
 #endif
