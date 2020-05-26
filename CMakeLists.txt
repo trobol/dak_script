@@ -55,6 +55,12 @@ endif()
 
 add_subdirectory(src)
 
+
+option(ADD_PROFILING "ADD_PROFILING" OFF)
+if(ADD_PROFILING)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+endif()
+
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING) AND BUILD_TESTING)
     add_subdirectory(tests)
     message("tests enabled")

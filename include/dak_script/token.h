@@ -102,6 +102,7 @@ namespace dak::script
     {
         std::vector<Token> tokens;
         std::vector<Token_Pos> positions;
+        std::vector<Token_Literal> literals;
         const char *buffer;
         uint32_t buffer_size;
     };
@@ -109,6 +110,7 @@ namespace dak::script
     const char *token_type_to_name(Token_Type t);
 
     extern const std::unordered_map<Token_Type, const char *> keyword_map;
+
 
 } // namespace dak::script
 

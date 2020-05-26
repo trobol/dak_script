@@ -13,5 +13,20 @@ target_include_directories(dak_script PUBLIC "${PROJECT_SOURCE_DIR}/include")
 add_executable(compile "./main.cpp")
 target_link_libraries(compile PRIVATE dak_script)
 
+
+install(TARGETS compile DESTINATION bin)
+
+
 # IDEs should put the headers in a nice place
 source_group(TREE "${PROJECT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${HEADER_LIST})
+
+
+add_custom_target(profile
+
+    COMMAND ${CMAKE_INSTALL_PREFIX}/bin/compile ../example_file.txt
+    COMMAND gprof ${CMAKE_INSTALL_PREFIX}/bin/compile gmon.out > analysis.txt
+
+    COMMENT "profiling compile"
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+
+)

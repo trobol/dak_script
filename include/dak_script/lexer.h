@@ -6,8 +6,6 @@
 
 namespace dak::script
 {
-	class Parser;
-
 	class Lexer
 	{
 	protected:
@@ -26,6 +24,7 @@ namespace dak::script
 		uint32_t m_character_number;
 
 		std::vector<substr> m_identifiers;
+		std::vector<Token_Literal> m_literals;
 
 		std::vector<Token> m_tokens;
 
@@ -37,11 +36,26 @@ namespace dak::script
 		Token parse_char_literal();
 		Token parse_num_literal();
 
+		Token parse_hex_literal();
+		Token parse_binary_literal();
+		Token parse_decimal_literal();
+
+
+		Token make_error();
+
+		Token make_literal(char);
+		Token make_literal(const char*);
+		Token make_literal(double);
+		Token make_literal(long long int);
+
+
 		Token next();
 
 		char peek_char();
 		char peek_char(uint32_t);
+
 		void pop_char();
+		void pop_char(uint32_t);
 
 		void break_line();
 

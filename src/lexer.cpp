@@ -1,3 +1,4 @@
+#include <dak_script/token.h>
 #include <dak_script/lexer.h>
 #include <dak_script/character_type.h>
 #include <dak_script/character_traits.h>
@@ -19,6 +20,19 @@ namespace dak::script
 		return Token{TOKEN_IS_IDENTIFIER, .index = (m_identifiers.size() - 1)};
 	}
 
+	Token Lexer::make_error() {
+		return Token{TOKEN_IS_TOKEN, TOKEN_ERROR};
+	}
+
+	Token Lexer::make_literal(double f) {
+		m_literals.push_back(Token_Literal{LITERAL_TYPE_FLOAT, .float_val = (f)});
+		return Token{TOKEN_IS_LITERAL, .index = (m_literals.size()-1)};
+	}
+
+	Token Lexer::make_literal(long long int i) {
+		m_literals.push_back(Token_Literal{LITERAL_TYPE_INT, .int_val = (i)});
+		return Token{TOKEN_IS_LITERAL, .index = (m_literals.size()-1)};
+	}
 	Lexer::Lexer(const char *data, size_t size) : m_data{data},
 												  m_size{size},
 												  m_index{0},
@@ -46,15 +60,22 @@ namespace dak::script
 
 	void Lexer::pop_char()
 	{
-		m_character_number++;
-		m_index++;
+		++m_character_number;
+		++m_index;
+	}
+	void Lexer::pop_char(uint32_t i)
+	{
+		m_character_number+=i;
+		m_index+=i;
 	}
 
 	Token_Module Lexer::lex()
 	{
 
 		Token token;
-
+	
+	
+		
 		do
 		{
 			token = next();
@@ -84,7 +105,7 @@ namespace dak::script
 			}
 		}
 
-		return Token_Module{std::move(m_tokens), std::move(m_positions), buffer, buffer_size};
+		return Token_Module{std::move(m_tokens), std::move(m_positions), std::move(m_literals), buffer, buffer_size};
 	}
 
 	Token Lexer::next()
@@ -108,69 +129,10 @@ namespace dak::script
 		{
 		case 0:
 			return make_token(TOKEN_EOF);
-		case 'a':
-		case 'b':
-		case 'c':
-		case 'd':
-		case 'e':
-		case 'f':
-		case 'g':
-		case 'h':
-		case 'i':
-		case 'j':
-		case 'k':
-		case 'l':
-		case 'm':
-		case 'n':
-		case 'o':
-		case 'p':
-		case 'q':
-		case 'r':
-		case 's':
-		case 't':
-		case 'u':
-		case 'v':
-		case 'w':
-		case 'x':
-		case 'y':
-		case 'z':
-		case 'A':
-		case 'B':
-		case 'C':
-		case 'D':
-		case 'E':
-		case 'F':
-		case 'G':
-		case 'H':
-		case 'I':
-		case 'J':
-		case 'K':
-		case 'L':
-		case 'M':
-		case 'N':
-		case 'O':
-		case 'P':
-		case 'Q':
-		case 'R':
-		case 'S':
-		case 'T':
-		case 'U':
-		case 'V':
-		case 'W':
-		case 'X':
-		case 'Y':
-		case 'Z':
+		case 'a'...'z':
+		case 'A'...'Z':
 			return parse_identifier();
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
+		case '0'...'9':
 		case '.':
 			return parse_num_literal();
 		case '"':
@@ -192,6 +154,8 @@ namespace dak::script
 			return make_token(static_cast<Token_Type>(c));
 		}
 	}
+
+	
 
 	Token Lexer::parse_identifier()
 	{
@@ -285,31 +249,159 @@ namespace dak::script
 		m_line_number++;
 	}
 
+	Token Lexer::parse_char_literal() {
+		pop_char();
+
+	}
+
+	Token Lexer::parse_string_literal() {
+		pop_char();
+		while(true) {
+			char c = peek_char();
+			pop_char();
+			if(c == '"') {
+
+			} else if(c == '\\') {
+				char a = peek_char();
+				pop_char();
+				char result;
+				switch (a) {
+					case '"':
+						result = '"';
+						break;
+					case '?':
+						result = '?';
+						break;
+					case '\\':
+						result = '\\';
+						break;
+					case 'a':
+						result = 'a ';
+						break;
+					case 'b':
+						result = 'b';
+						break;
+					case 'f':
+						result = 'f';
+						break;
+					case 'n':
+						result = 'n';
+						break;
+					case 'r':
+						result = 'r';
+						break;
+					case 't':
+						result = 't';
+						break;
+					case 'v':
+						result = 'v';
+						break;
+					default:
+						result = 0;
+						break;
+					
+				}
+		
+			}
+		}
+	}	
+
 	Token Lexer::parse_num_literal()
 	{
+		char a = peek_char();
+		char b = peek_char(1);
+
+		if(a == '0') {
+			if(b == 'x') {
+				return parse_hex_literal();
+			}
+			if(b == 'b') {
+				return parse_binary_literal();
+			}
+		}
+
+		return parse_decimal_literal();
+	}
+
+
+	Token Lexer::parse_hex_literal() {
+		pop_char(2);
+
+		long long int value = 0;
+		while(true) {
+			char c = peek_char();
+			pop_char();
+
+			uint8_t num;
+			switch (c)
+			{
+			case '0'...'9':
+				num = c - '0';
+				break;
+			case 'a'...'f':
+				num = c-'a' + 10;
+				break;
+			case 'A'...'F':
+				num = c-'A' + 10;
+				break;
+			case 'g'...'z':
+			case 'G'...'Z':
+				return make_error();
+			default:
+				
+				return make_literal(value);
+			}
+
+			value = (value << 4) | num;
+
+		}
+
+
+	}
+
+	Token Lexer::parse_binary_literal() {
+		pop_char(2);
+
+		long long int value = 0;
+		while(true) {
+			char c = peek_char();
+			pop_char();
+			
+			switch (c) {
+				case '0':
+					value = value<< 1;
+					break;
+				case '1':
+					value = value << 1;
+					value = value | 1;
+					break;
+				case '2'...'9':
+				case 'a'...'z':
+				case 'A'...'Z':
+					return make_error();
+				default:
+					return make_literal(value);
+			}
+		}
+	}
+
+	Token Lexer::parse_decimal_literal() {
 		unsigned int integral_digits = 0;
 		unsigned int fractional_digits = 0;
-		unsigned int integral_value = 0;
-		unsigned int fractional_value = 0;
-		char c = peek_char();
+		long long int integral_value = 0;
+		long long int fractional_value = 0;
+		
 		
 
 		while (true)
 		{
+			char c = peek_char();
+			pop_char();
 			uint8_t digit_val = c - '0';
 
 			switch (c)
 			{
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
+			case '0'...'9':
 				if (fractional_digits > 0)
 				{
 					fractional_value = (fractional_value * fractional_digits) + digit_val;
@@ -317,7 +409,7 @@ namespace dak::script
 				}
 				else
 				{
-					integral_value = (integral_value * integral_value) + digit_val;
+					integral_value = (integral_value * integral_digits) + digit_val;
 					integral_digits *= 10;
 				}
 				break;
@@ -325,15 +417,28 @@ namespace dak::script
 				if (fractional_digits > 0)
 				{
 					//add better error
-					return make_token(TOKEN_ERROR);
+					return make_error();
 				}
 				else
 				{
 					fractional_digits = 1;
 				}
-
+				break;
+			case 'a'...'z':
+			case 'A'...'Z':
+				return make_error();
 			default:
+				//end of number
+				if (fractional_digits > 0) {
+					double f = integral_value;
+					f += (float)fractional_value / fractional_digits;
+						return make_literal(f);
+ 				} else {
+
+					 return make_literal(integral_value);
+				}
 			}
 		}
 	}
+
 } // namespace dak::script
