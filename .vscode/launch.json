@@ -9,10 +9,17 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/src/compile",
-            "args": [],
+            "args": [
+                "example_file.txt"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "environment": [
+                {
+                    "name": "MALLOC_CHECK_",
+                    "value": "2"
+                }
+            ],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [

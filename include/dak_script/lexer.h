@@ -1,9 +1,10 @@
 #ifndef _DAK_SCRIPT_LEXER_H
 #define _DAK_SCRIPT_LEXER_H
 
-#include "token.h"
-#include <vector>
+#include <dak_script/token_module.h>
 #include <dak_std/string.h>
+#include <dak_std/vector.h>
+#include <vector>
 
 namespace dak_script
 {
@@ -18,20 +19,20 @@ protected:
 
 private:
 	const char *m_data;
-	uint32_t m_size;
-	uint32_t m_index;
+	size_t m_size;
+	size_t m_index;
 
 	uint32_t m_line_number;
 	uint32_t m_character_number;
 
-	std::vector<substr> m_identifiers;
-	std::vector<Token_Literal> m_literals;
+	dak_std::vector<substr> m_identifiers;
+	dak_std::vector<Token_Literal> m_literals;
 
-	std::vector<dak_std::string> m_string_literals;
+	dak_std::vector<dak_std::string> m_string_literals;
 
-	std::vector<Token> m_tokens;
+	dak_std::vector<Token> m_tokens;
 
-	std::vector<Token_Pos> m_positions;
+	dak_std::vector<Token_Pos> m_positions;
 
 	Token parse_identifier();
 	Token parse_slash();
@@ -48,7 +49,7 @@ private:
 	Token make_literal(char);
 	Token make_literal(double);
 	Token make_literal(long long int);
-	Token make_literal(char*);
+	Token make_literal(char *);
 
 	Token next();
 

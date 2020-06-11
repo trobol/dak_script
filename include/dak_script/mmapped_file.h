@@ -7,18 +7,25 @@
 namespace dak_script
 {
 
-struct mmapped_file
+class mmapped_file
 {
-	file_descriptor fd;
-	size_t length;
-	const char *contents;
-	operator const char *() { return contents; }
+private:
+	const char *m_data;
+	size_t m_size;
+	file_descriptor &m_fd;
+
+	mmapped_file(const mmapped_file &);
+
+public:
+	static mmapped_file map(file_descriptor &fd);
+	static mmapped_file map(file_descriptor &fd, size_t size);
+
+	mmapped_file(file_descriptor &fd, size_t size, const char *data);
+
+	size_t size() const { return m_size; }
+	const char *data() const { return m_data; }
+	int unmap();
 };
-
-mmapped_file map_file(file_descriptor fd);
-mmapped_file map_file(file_descriptor fd, size_t length);
-
-int unmap_file(mmapped_file file);
 
 } // namespace dak_script
 

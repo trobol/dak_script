@@ -10,13 +10,13 @@ class string
 {
 private:
 	union {
-		struct {
+		struct
+		{
 			char *ptr;
 			size_t size;
 			size_t capacity;
 		};
 	} m_data;
-	
 
 public:
 	string() noexcept;
@@ -35,7 +35,8 @@ public:
 	string(char const *c_str, size_t size);
 	string(char const *c_str);
 	string(const string &str);
-	string(string &&str) noexcept {
+	string(string &&str) noexcept
+	{
 		m_data = str.m_data;
 		str.m_data.size = 0;
 		str.m_data.ptr = nullptr;
@@ -44,9 +45,7 @@ public:
 
 	~string() { free(m_data.ptr); }
 
-	string &operator=(string const &other) {
-		
-	}
+	string &operator=(string const &other) { return *this; }
 
 	char &operator[](size_t i) { return m_data.ptr[i]; }
 

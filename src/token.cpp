@@ -1,5 +1,6 @@
 #include <dak_script/token.h>
 
+#include <iostream>
 #include <unordered_map>
 
 namespace dak_script

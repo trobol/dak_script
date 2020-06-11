@@ -6,3 +6,4 @@ AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: true
 AccessModifierOffset: -8
 AlignAfterOpenBracket: Align
+AlwaysBreakTemplateDeclarations: Yes

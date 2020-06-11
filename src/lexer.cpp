@@ -1,8 +1,7 @@
-#include <dak_script/character_traits.h>
-#include <dak_script/character_type.h>
 #include <dak_script/lexer.h>
 #include <dak_script/token.h>
 #include <dak_script/token_maps.h>
+
 #include <dak_std/string.h>
 #include <iostream>
 
@@ -14,8 +13,8 @@ Token Lexer::make_token(Token_Value t) { return Token{TOKEN_TYPE_TOKEN, t}; }
 Token Lexer::make_identifier(const char *start, uint32_t size)
 {
 	m_identifiers.push_back({start, size});
-	return Token{TOKEN_TYPE_IDENTIFIER,
-		     .index = (m_identifiers.size() - 1)};
+	size_t index = (m_identifiers.size() - 1);
+	return Token{TOKEN_TYPE_IDENTIFIER, .index = index};
 }
 
 Token Lexer::make_error() { return Token{TOKEN_TYPE_TOKEN, TOKEN_ERROR}; }
@@ -33,15 +32,16 @@ Token Lexer::make_literal(long long int i)
 	return Token{TOKEN_TYPE_LITERAL, .index = (m_literals.size() - 1)};
 }
 
-
-Token Lexer::make_literal(char* str) {
-	m_literals.push_back(Token_Literal{LITERAL_TYPE_STRING, .string_val = str});
+Token Lexer::make_literal(char *str)
+{
+	m_literals.push_back(
+	    Token_Literal{LITERAL_TYPE_STRING, .string_val = str});
 	return Token{TOKEN_TYPE_LITERAL, .index = (m_literals.size() - 1)};
 }
 
 Lexer::Lexer(const char *data, size_t size)
     : m_data{data}, m_size{size}, m_index{0}, m_character_number{0},
-      m_line_number{0} {};
+      m_line_number{static_cast<uint32_t>(0)} {};
 
 char Lexer::peek_char()
 {
@@ -107,8 +107,8 @@ Token_Module Lexer::lex()
 		}
 	}
 
-	return Token_Module{std::move(m_tokens), std::move(m_positions),
-			    std::move(m_literals), std::move(m_string_literals), buffer, buffer_size};
+	return Token_Module(m_tokens, m_positions, m_literals, buffer,
+			    buffer_size);
 }
 
 Token Lexer::next()
@@ -158,6 +158,19 @@ Token Lexer::next()
 	}
 }
 
+bool is_identifier_character(char c)
+{
+	switch (c)
+	{
+		case 'a' ... 'z':
+		case 'A' ... 'Z':
+		case '0' ... '9':
+			return true;
+		default:
+			return false;
+	}
+}
+
 Token Lexer::parse_identifier()
 {
 	size_t start = m_index;
@@ -166,10 +179,6 @@ Token Lexer::parse_identifier()
 	{
 		pop_char();
 		c = peek_char();
-		if (c == 0)
-		{
-			return make_token(TOKEN_EOF);
-		}
 
 	} while (is_identifier_character(c));
 
@@ -291,7 +300,7 @@ Token Lexer::parse_string_literal()
 	pop_char();
 	// calculate length
 	size_t size = 0;
-	for(size_t i = 0; i < 0xfffff; i++)
+	for (size_t i = 0; i < 0xfffff; i++)
 	{
 		char c = peek_char(i);
 		if (c == '"')
@@ -308,7 +317,7 @@ Token Lexer::parse_string_literal()
 		}
 	}
 
-	char* str = new char[size+1];
+	char *str = new char[size + 1];
 	str[size] = 0;
 	for (size_t i = 0; i < size; ++i)
 	{
@@ -321,7 +330,7 @@ Token Lexer::parse_string_literal()
 			{
 				printf("%c", c);
 				// invalid escape character
-				return  make_error();
+				return make_error();
 			}
 		}
 		str[i] = c;

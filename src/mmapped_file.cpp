@@ -13,27 +13,27 @@
 namespace dak_script
 {
 #ifdef __unix__
-mmapped_file map_file(file_descriptor fd)
+
+mmapped_file::mmapped_file(file_descriptor &fd, size_t size, const char *data)
+    : m_fd{fd}, m_size{size}, m_data{data}
 {
-	return map_file(fd, len(fd));
+}
+mmapped_file mmapped_file::map(file_descriptor &fd)
+{
+	return mmapped_file::map(fd, fd.size());
 }
 
-mmapped_file map_file(file_descriptor fd, size_t length)
+mmapped_file mmapped_file::map(file_descriptor &fd, size_t length)
 {
 
-	void *ptr = mmap(NULL, length, PROT_READ, MAP_PRIVATE, fd, 0u);
+	void *ptr = mmap(NULL, length, PROT_READ, MAP_PRIVATE, fd.id(), 0u);
 	if (ptr == MAP_FAILED)
 		return {fd, 0, nullptr};
 
-	return {
-		fd,
-		length, static_cast<const char *>(ptr)};
+	return mmapped_file(fd, length, static_cast<const char *>(ptr));
 }
 
-int unmap_file(mmapped_file file)
-{
-	return munmap((void *)file.contents, file.length);
-}
+int mmapped_file::unmap() { return munmap((void *)m_data, m_size); }
 
 #elif defined(WIN32) || defined(_WIN32)
 
