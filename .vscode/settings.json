@@ -64,5 +64,9 @@
     },
     "cSpell.enableFiletypes": [
         "shellscript"
-    ]
+    ],
+    "disasexpl.associations": {
+        "**/*.c": "${workspaceFolder}/build/${relativeFileDir}/${fileBasenameNoExtension}.s",
+        "**/*.cpp": "${workspaceFolder}/build/${relativeFileDir}/${fileBasenameNoExtension}.s"
+    }
 }

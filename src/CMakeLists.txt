@@ -5,7 +5,7 @@ list(REMOVE_ITEM SOURCE_FILES "main.cpp")
 option(ADD_PROFILING "ADD_PROFILING" OFF)
     if(ADD_PROFILING)
     message(STATUS "profiling enabled")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 
@@ -28,8 +28,8 @@ source_group(TREE "${PROJECT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${
 
 add_custom_target(profile
 
-    COMMAND ${CMAKE_INSTALL_PREFIX}/bin/compile ../example_file.txt
-    COMMAND gprof ${CMAKE_INSTALL_PREFIX}/bin/compile | gprof2dot | dot -Tpng -o output.png -n 
+    COMMAND valgrind --tool=callgrind --callgrind-out-file="callgrind.out" ./src/compile ../example_file.dak
+    COMMAND gprof2dot -f callgrind ./callgrind.out | dot -Tpng -o output.png
 
     COMMENT "profiling compile"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

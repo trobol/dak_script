@@ -6,6 +6,8 @@
 
 namespace dak_std
 {
+
+// TODO SSO
 class string
 {
 private:

@@ -19,6 +19,11 @@ int main(int argc, char *argv[])
 	}
 	file_descriptor fd = file_descriptor::open(argv[1], READ_ONLY);
 
+	if (fd.id() == -1)
+	{
+		printf("unable to open %s\n", argv[1]);
+		return 1;
+	}
 	mmapped_file file = mmapped_file::map(fd);
 
 	Lexer lexer(file.data(), file.size());
@@ -56,7 +61,14 @@ int main(int argc, char *argv[])
 		}
 		else if (t.type == TOKEN_TYPE_TOKEN)
 		{
-			output << token_value_to_name(t.value) << '\n';
+			if (t.value < 255)
+			{
+				output << char(t.value) << '\n';
+			}
+			else
+			{
+				output << token_value_to_name(t.value) << '\n';
+			}
 		}
 	}
 

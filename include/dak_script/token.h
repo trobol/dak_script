@@ -14,6 +14,7 @@ namespace dak_script
 enum Token_Value : uint32_t
 {
 	TOKEN_EOF = 0,
+	TOKEN_AT = '@',
 	TOKEN_OPEN_BRACKET = '{',
 	TOKEN_CLOSE_BRACKET = '}',
 
@@ -101,7 +102,13 @@ struct Token_Pos
 
 const char *token_value_to_name(Token_Value t);
 
-extern const std::unordered_map<Token_Value, const char *> keyword_map;
+struct Token_Value_Hash
+{
+	size_t operator()(Token_Value const &s) const noexcept { return s; }
+};
+
+extern const std::unordered_map<Token_Value, const char *, Token_Value_Hash>
+    keyword_map;
 
 } // namespace dak_script
 
