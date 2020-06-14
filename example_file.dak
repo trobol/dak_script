@@ -1,18 +1,48 @@
 @Buildable
-Test :: struct {
+type Test struct {
     hi: bool
     test: float = 0b0101,
     other: string = "hello\n"
 }
 
 //Test member function 'test_function' with parameter 'val' of type float that returns two floats
-test_function :: (val: float) (float, float) {
+function test_function (val: f32) (f64, f32) {
+    val : i32
+    val2 := f32(val) - 1.0
+    return val2, _
+}
+
+
+function (t: Test) construct() {
+    // do alot of work
+    return Test{hi = false, test = 1, other = "bye"}
+}
+
+type Vector struct {
+    list: nullptr
 
 }
 
 
+const { *obj, }
+
+
+function something() {
+    list : Vector = construct(0, 1, 2)
+    
+    
+
+}
+
+
+obj . func ( )
+
+obj.func()
+
+
+
 a : Test //variable a of type Test default initialized
-b : Test = Test{} //default initialized with explicit type
+b : Test = Test{} //default initialized with explicit type  
 c := Test{} // default initialized with deduced type
 
 

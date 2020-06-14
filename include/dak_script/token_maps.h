@@ -12,7 +12,7 @@ constexpr const auto token_keyword_map = build_String_Map<Token_Value>(
 		  {"if", TOKEN_KEYWORD_IF},
 		  {"else", TOKEN_KEYWORD_ELSE},
 		  {"defer", TOKEN_KEYWORD_DEFER},
-		  {"func", TOKEN_KEYWORD_FUNC},
+		  {"function", TOKEN_KEYWORD_FUNCTION},
 		  {"uninitialized", TOKEN_KEYWORD_UNINITIALIZED}});
 }
 #endif

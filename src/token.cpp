@@ -32,7 +32,7 @@ const char *token_value_to_name(Token_Value t)
 			return "TOKEN_KEYWORD_DEFER";
 		case TOKEN_KEYWORD_STRUCT:
 			return "TOKEN_KEWORD_STRUCT";
-		case TOKEN_KEYWORD_FUNC:
+		case TOKEN_KEYWORD_FUNCTION:
 			return "TOKEN_KEYWORD_FUNC";
 		case TOKEN_KEYWORD_TYPE:
 			return "TOKEN_KEYWORD_TYPE";

@@ -52,7 +52,7 @@ enum Token_Value : uint32_t
 	TOKEN_KEYWORD_STRUCT,
 	TOKEN_KEYWORD_TYPE,
 	TOKEN_KEYWORD_UNINITIALIZED,
-	TOKEN_KEYWORD_FUNC,
+	TOKEN_KEYWORD_FUNCTION,
 	TOKEN_BREAK,
 
 	TOKEN_ERROR,
@@ -73,6 +73,15 @@ struct Token
 		Token_Value value;
 		uint64_t index;
 	};
+
+	bool operator==(const Token_Value val)
+	{
+		return type == TOKEN_TYPE_TOKEN && value == val;
+	}
+	bool operator!=(const Token_Value val)
+	{
+		return type != TOKEN_TYPE_TOKEN || value != val;
+	}
 };
 
 enum Token_Literal_Type
@@ -106,9 +115,6 @@ struct Token_Value_Hash
 {
 	size_t operator()(Token_Value const &s) const noexcept { return s; }
 };
-
-extern const std::unordered_map<Token_Value, const char *, Token_Value_Hash>
-    keyword_map;
 
 } // namespace dak_script
 
