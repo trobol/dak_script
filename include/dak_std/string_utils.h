@@ -1,6 +1,8 @@
-#ifndef _DAK_SCRIPT_STRING_UTILS
-#define _DAK_SCRIPT_STRING_UTILS
+#ifndef _DAK_STD_STRING_UTILS
+#define _DAK_STD_STRING_UTILS
 
+namespace dak_std
+{
 inline constexpr bool str_less(const char *lhs, const char *rhs) noexcept
 {
 	while (*lhs && *rhs && *lhs == *rhs)
@@ -21,7 +23,8 @@ inline constexpr bool str_greater(const char *lhs, const char *rhs) noexcept
 	return *lhs > *rhs;
 }
 
-inline constexpr bool substr_less(const char *lhs, const char *rhs, const char* end) noexcept
+inline constexpr bool substr_less(const char *lhs, const char *rhs,
+				  const char *end) noexcept
 {
 	while (*lhs && rhs < end && *lhs == *rhs)
 	{
@@ -31,7 +34,8 @@ inline constexpr bool substr_less(const char *lhs, const char *rhs, const char* 
 	return *lhs < *rhs;
 }
 
-inline constexpr bool substr_greater(const char *lhs, const char *rhs, const char* end) noexcept
+inline constexpr bool substr_greater(const char *lhs, const char *rhs,
+				     const char *end) noexcept
 {
 	while (*lhs && rhs < end && *lhs == *rhs)
 	{
@@ -60,5 +64,7 @@ constexpr const size_t min_str_len(const char *(&data)[N])
 	}
 	return s;
 }
+
+} // namespace dak_std
 
 #endif

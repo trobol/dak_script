@@ -1,6 +1,7 @@
 #include <ctime>
 #include <dak_script/lexer.h>
 #include <dak_script/mmapped_file.h>
+#include <dak_script/parser.h>
 #include <dak_script/token.h>
 #include <fstream>
 #include <iostream>
@@ -71,6 +72,10 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
+	Parser parser(mod);
+
+	Parsed_Module *parsed_module = parser.parse();
 
 	int err_mmf = file.unmap();
 

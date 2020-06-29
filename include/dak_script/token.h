@@ -25,6 +25,7 @@ enum Token_Value : uint32_t
 	TOKEN_CLOSE_PAREN = ')',
 
 	TOKEN_COMMA = ',',
+	TOKEN_DOT = '.',
 
 	TOKEN_ASTERISK = '*',
 	TOKEN_AMPERSAND = '&',

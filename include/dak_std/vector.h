@@ -2,8 +2,11 @@
 #define _DAK_STD_VECTOR_H
 
 #include "assert.h"
-#include <cstdlib>
+#include <algorithm>
+#include <cstring>
+#include <initializer_list>
 #include <type_traits>
+#include <utility>
 
 namespace dak_std
 {

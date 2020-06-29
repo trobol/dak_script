@@ -1,15 +1,17 @@
-#ifndef _DAK_SCRIPT_STRING_MAP
-#define _DAK_SCRIPT_STRING_MAP
+#ifndef _DAK_STD_STRING_MAP
+#define _DAK_STD_STRING_MAP
 
-#include <vector>
-#include <utility>
-#include <functional>
 #include <cstring>
+#include <functional>
+#include <utility>
+#include <vector>
 
 #include "string_utils.h"
 
-template <typename Value, std::size_t N>
-class String_Map
+namespace dak_std
+{
+template <typename Value, std::size_t N = 0>
+class Static_String_Map
 {
 public:
 	using pair_type = std::pair<const char *, Value>;
@@ -22,14 +24,15 @@ private:
 	const Value m_default;
 
 	template <std::size_t... I>
-	constexpr String_Map(const Value default_value, const pair_type (&data)[N], std::index_sequence<I...>)
-		: m_data{data[I].first...},
-		  m_tokens{data[I].second...},
-		  m_min_str_size{min_str_len<N>(m_data)},
-		  m_default{default_value}
+	constexpr Static_String_Map(const Value default_value,
+				    const pair_type (&data)[N],
+				    std::index_sequence<I...>)
+	    : m_data{data[I].first...}, m_tokens{data[I].second...},
+	      m_min_str_size{min_str_len<N>(m_data)}, m_default{default_value}
 	{
 
-		for (size_t left = 0, right = N - 1; right > 0; right = left, left = 0)
+		for (size_t left = 0, right = N - 1; right > 0;
+		     right = left, left = 0)
 		{
 			for (size_t i = 0; i < right; ++i)
 			{
@@ -49,7 +52,10 @@ private:
 	}
 
 public:
-	constexpr String_Map(const Value default_value, const pair_type (&data)[N]) noexcept : String_Map(default_value, data, std::make_index_sequence<N>())
+	constexpr Static_String_Map(const Value default_value,
+				    const pair_type (&data)[N]) noexcept
+	    : Static_String_Map(default_value, data,
+				std::make_index_sequence<N>())
 	{
 	}
 	Value find_substr(const char *str, const char *end) const noexcept
@@ -97,16 +103,17 @@ public:
 		return m_data;
 	}
 
-	constexpr std::size_t size() const noexcept
-	{
-		return N;
-	}
+	constexpr std::size_t size() const noexcept { return N; }
 };
 
 template <typename Value, std::size_t N>
-static constexpr auto build_String_Map(const Value default_value, const std::pair<const char *, Value> (&data)[N]) noexcept
+static constexpr auto Build_Static_String_Map(
+    const Value default_value,
+    const std::pair<const char *, Value> (&data)[N]) noexcept
 {
-	return String_Map<Value, N>(default_value, data);
+	return Static_String_Map<Value, N>(default_value, data);
 }
+
+} // namespace dak_std
 
 #endif
