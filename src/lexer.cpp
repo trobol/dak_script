@@ -85,30 +85,7 @@ Token_Module Lexer::lex()
 		    Token_Pos{m_line_number, m_character_number});
 	} while (token.type != TOKEN_TYPE_TOKEN || token.value != TOKEN_EOF);
 
-	uint32_t buffer_size = 0;
-	for (substr &s : m_identifiers)
-	{
-		buffer_size += s.size + 1;
-	}
-
-	char *buffer = new char[buffer_size];
-
-	uint32_t write_offset = 0;
-	for (Token &t : m_tokens)
-	{
-		if (t.type == TOKEN_TYPE_IDENTIFIER)
-		{
-			char *write_pos = buffer + write_offset;
-			substr s = m_identifiers[t.index];
-			memcpy(write_pos, s.start, s.size);
-			write_pos[s.size] = 0;
-			t.index = write_offset;
-			write_offset += s.size + 1;
-		}
-	}
-
-	return Token_Module(m_tokens, m_positions, m_literals, buffer,
-			    buffer_size);
+	return Token_Module(m_tokens, m_positions, m_literals, m_identifiers);
 }
 
 Token Lexer::next()
@@ -144,6 +121,13 @@ Token Lexer::next()
 			return parse_char_literal();
 		case '/':
 			return parse_slash();
+		case '\r':
+			if (peek_char(1) == '\n')
+				pop_char(2);
+			else
+				pop_char();
+			break_line();
+			return make_token(TOKEN_BREAK);
 		case '\n':
 			pop_char();
 			break_line();
@@ -165,6 +149,7 @@ bool is_identifier_character(char c)
 		case 'a' ... 'z':
 		case 'A' ... 'Z':
 		case '0' ... '9':
+		case '_':
 			return true;
 		default:
 			return false;
@@ -183,7 +168,7 @@ Token Lexer::parse_identifier()
 	} while (is_identifier_character(c));
 
 	Token_Value t =
-	    token_keyword_map.find_substr(m_data + start, m_data + m_index - 1);
+	    token_keyword_map.find_substr(m_data + start, m_index - start);
 
 	if (t == TOKEN_EMPTY)
 	{
@@ -211,9 +196,15 @@ Token Lexer::parse_slash()
 			{
 				return make_token(TOKEN_EOF);
 			}
-		} while (c != '\n');
 
-		return make_token(TOKEN_LINE_FEED);
+		} while (c != '\n' && c != '\r');
+		// unify line endings
+		if (c == '\r' && peek_char(1) == '\n')
+		{
+			pop_char();
+		}
+		break_line();
+		return make_token(TOKEN_BREAK);
 	}
 	else if (c == '*')
 	{
@@ -230,12 +221,12 @@ Token Lexer::parse_slash()
 			if (c == '\n')
 			{
 				break_line();
-				token = make_token(TOKEN_LINE_FEED);
+				token = make_token(TOKEN_BREAK);
 			}
 			else if (c == '/' && peek_char(1) == '*')
 			{
 				Token t = parse_slash();
-				if (t.type == TOKEN_LINE_FEED)
+				if (t.type == TOKEN_BREAK)
 				{
 					token = t;
 				}
@@ -245,7 +236,7 @@ Token Lexer::parse_slash()
 				}
 			}
 		} while (!(c == '*' && peek_char(1) == '/'));
-		pop_char();
+		pop_char(2);
 		return token;
 	}
 	else
@@ -307,7 +298,7 @@ Token Lexer::parse_string_literal()
 		{
 			break;
 		}
-		else if (c == '\n' || c == 0)
+		else if (c == '\n' || c == '\r' || c == 0)
 		{
 			return make_error();
 		}
@@ -336,6 +327,7 @@ Token Lexer::parse_string_literal()
 		str[i] = c;
 		pop_char();
 	}
+	pop_char(); // pop ending quotation mark
 	return make_literal(str);
 }
 
@@ -354,6 +346,11 @@ Token Lexer::parse_num_literal()
 		{
 			return parse_binary_literal();
 		}
+	}
+	else if (a == '.' && !(b > '0' && b < '9'))
+	{
+		pop_char();
+		return make_token(TOKEN_DOT);
 	}
 
 	return parse_decimal_literal();
@@ -432,7 +429,7 @@ Token Lexer::parse_decimal_literal()
 	while (true)
 	{
 		char c = peek_char();
-		pop_char();
+
 		uint8_t digit_val = c - '0';
 
 		switch (c)
@@ -481,6 +478,7 @@ Token Lexer::parse_decimal_literal()
 					return make_literal(integral_value);
 				}
 		}
+		pop_char();
 	}
 }
 

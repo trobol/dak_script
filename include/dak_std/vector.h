@@ -122,7 +122,7 @@ public:
 		else
 		{
 			new_begin = (T *)std::malloc(size * sizeof(T));
-			for (T *src = m_begin, dst = new_begin; src != m_end;
+			for (T *src = m_begin, *dst = new_begin; src != m_end;
 			     ++src, ++dst)
 			{
 				if constexpr (std::is_scalar_v<T>)
@@ -135,7 +135,7 @@ public:
 				}
 				else
 				{
-					new (dst) T(*src);
+					new (static_cast<void *>(dst)) T(*src);
 				}
 			}
 

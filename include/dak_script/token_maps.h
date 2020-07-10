@@ -13,7 +13,10 @@ constexpr const auto token_keyword_map =
 		      {"if", TOKEN_KEYWORD_IF},
 		      {"else", TOKEN_KEYWORD_ELSE},
 		      {"defer", TOKEN_KEYWORD_DEFER},
-		      {"function", TOKEN_KEYWORD_FUNCTION},
-		      {"uninitialized", TOKEN_KEYWORD_UNINITIALIZED}});
+		      {"func", TOKEN_KEYWORD_FUNC},
+		      {"uninit", TOKEN_KEYWORD_UNINIT},
+		      {"return", TOKEN_KEYWORD_RETURN},
+		      {"nullptr", TOKEN_KEYWORD_NULLPTR},
+		      {"null", TOKEN_KEYWORD_NULL}});
 }
 #endif

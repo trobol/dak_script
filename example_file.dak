@@ -7,14 +7,14 @@ type Test struct {
 
 
 //Test member function 'test_function' with parameter 'val' of type float that returns two floats
-function test_function (val: f32) f32 {
+func test_function (val: f32) f32 {
     val : i32
     val2 := f32(val) - 1.0
     return val2
 }
 
-
-function (t: Test) construct() {
+/*
+func construct() {
 
     return Test{hi = false, test = 1, other = "bye"}
 }
@@ -22,9 +22,9 @@ function (t: Test) construct() {
 type Vector struct {
     list: nullptr
 }
+*/
 
-
-function something() {
+function something(val: f32) f32 {
     list : Vector
     
     

@@ -8,13 +8,13 @@ class linear_allocator
 {
 private:
 	// where the next object will be allocated (if it fits)
-	void *m_page_head;
+	char *m_page_head;
 	// the end of the current page
-	void *m_page_tail;
+	char *m_page_tail;
 
 	struct page
 	{
-		void *data;
+		char *data;
 		page *last;
 	};
 
@@ -37,7 +37,7 @@ public:
 
 		while (current != nullptr)
 		{
-			page *p = m_page_list_tail->last;
+			page *p = current->last;
 
 			delete[] current->data;
 			delete current;
@@ -68,7 +68,7 @@ public:
 private:
 	void add_page()
 	{
-		void *data = ::operator new(m_page_size);
+		char *data = (char *)::operator new(m_page_size);
 
 		page *new_page = new page{data, m_page_list_tail};
 		m_page_list_tail = new_page;

@@ -1,7 +1,8 @@
 #ifndef _DAK_SCRIPT_PARSER_H
 #define _DAK_SCRIPT_PARSER_H
 
-#include <dak_script/abstract_syntax_tree.h>
+#include "token_module.h"
+#include <dak_script/ast.h>
 #include <dak_script/reserves.h>
 #include <dak_std/vector.h>
 #include <string>
@@ -10,51 +11,63 @@
 namespace dak_script
 {
 
+struct Parsed_Module
+{
+	// unused for now
+	// dak_std::vector<Scope_Block *> imports;
+
+	// exports
+	AST_Statement_Block *top_block;
+
+	Parsed_Module() {}
+};
+
 class Parser
 {
 	size_t m_index;
 
 	Token_Module &m_token_module;
 
-	dak_std::linear_allocator m_allocator;
-
-	Scope_Block *m_current_scope;
+	AST_Statement_Block *m_current_block;
 
 	Parsed_Module *m_parsed_module;
 
 public:
 	Parser(Token_Module &token_module)
-	    : m_token_module{token_module}, m_allocator(500)
+	    : m_index{0}, m_token_module{token_module}
 	{
 	}
 	Parsed_Module *parse();
 
 private:
-	ExprAST *next();
-	ExprAST *parse_num_expr();
-	ExprAST *parse_paren_expr();
-	void parse_function_dec_expr();
-	ExprAST *parse_function_call_expr();
-	ExprAST *parse_var_dec_expr();
-	ExprAST *parse_var_assign_expr();
+	AST_Variable *find_variable(dak_std::string &);
+
+	AST_Expression *parse_next_expression();
+	AST_Expression *parse_func_expr(dak_std::string &);
+	AST_Expression *parse_num_expr();
+	AST_Expression *parse_paren_expr();
+
+	AST_Statement *parse_next_statement();
+	AST_Declaration_Statement *parse_dec_statement(dak_std::string &);
+	AST_Assign_Statement *parse_assign_statement(dak_std::string &);
+	AST_Statement *parse_void_fuc_statement(dak_std::string &);
+
+	AST_Function *parse_func_dec();
+
+	void parse_block();
 
 	Token &peek_token() { return m_token_module.tokens[m_index]; }
 	Token &peek_token(size_t i)
 	{
 		return m_token_module.tokens[m_index + i];
 	}
-	Token &pop_token()
+	Token &pop_n_peek_token()
 	{
 		++m_index;
-		return m_token_module.tokens[m_index];
-	};
-	Token &pop_token(size_t i)
-	{
-		m_index += i;
-		return m_token_module.tokens[m_index];
+		return peek_token();
 	}
-
-	Type *find_type(const char *identifier, const Scope_Block &context);
+	void pop_token() { ++m_index; }
+	void pop_token(size_t i) { m_index += i; }
 };
 
 } // namespace dak_script

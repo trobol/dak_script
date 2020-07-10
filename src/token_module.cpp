@@ -4,10 +4,10 @@ namespace dak_script
 {
 Token_Module::Token_Module(dak_std::vector<Token> &t,
 			   dak_std::vector<Token_Pos> &p,
-			   dak_std::vector<Token_Literal> &l, const char *b,
-			   uint32_t bs)
+			   dak_std::vector<Token_Literal> &l,
+			   dak_std::vector<dak_std::string> &i)
     : tokens{std::move(t)}, positions{std::move(p)}, literals{std::move(l)},
-      buffer{b}, buffer_size{bs}
+      identifiers{std::move(i)}
 
 {
 }
@@ -21,8 +21,5 @@ Token_Module::~Token_Module()
 			delete[] l.string_val;
 		}
 	}
-
-	buffer_size = 0;
-	delete[] buffer;
 }
 } // namespace dak_script

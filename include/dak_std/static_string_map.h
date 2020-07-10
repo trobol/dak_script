@@ -21,6 +21,7 @@ private:
 	const char *m_data[N];
 	Value m_tokens[N];
 	const size_t m_min_str_size;
+	const size_t m_max_str_size;
 	const Value m_default;
 
 	template <std::size_t... I>
@@ -28,7 +29,8 @@ private:
 				    const pair_type (&data)[N],
 				    std::index_sequence<I...>)
 	    : m_data{data[I].first...}, m_tokens{data[I].second...},
-	      m_min_str_size{min_str_len<N>(m_data)}, m_default{default_value}
+	      m_min_str_size{min_str_len<N>(m_data)},
+	      m_max_str_size{max_str_len<N>(m_data)}, m_default{default_value}
 	{
 
 		for (size_t left = 0, right = N - 1; right > 0;
@@ -58,22 +60,17 @@ public:
 				std::make_index_sequence<N>())
 	{
 	}
-	Value find_substr(const char *str, const char *end) const noexcept
+	Value find_substr(const char *str, size_t length) const noexcept
 	{
-		int l = 0;
-		int r = N - 1;
-		while (l <= r)
+		char buffer[m_max_str_size + 1] = {};
+		if (length > m_max_str_size)
 		{
-			int m = l + (r - l) / 2;
-
-			if (substr_less(m_data[m], str, end))
-				l = m + 1;
-			else if (!substr_greater(m_data[m], str, end))
-				return m_tokens[m];
-			else
-				r = m - 1;
+			return m_default;
 		}
-		return m_default;
+		buffer[m_max_str_size + 1] = 0;
+		memcpy((void *)buffer, (void *)str, length);
+
+		return find(buffer);
 	}
 	Value find(const char *str) const noexcept
 	{
@@ -85,7 +82,7 @@ public:
 
 			if (str_less(m_data[m], str))
 				l = m + 1;
-			else if (!str_greater(m_data[m], str))
+			else if (str_equal(m_data[m], str))
 				return m_tokens[m];
 			else
 				r = m - 1;

@@ -60,7 +60,8 @@
         "variant": "cpp",
         "cinttypes": "cpp",
         "complex": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "unordered_set": "cpp"
     },
     "cSpell.enableFiletypes": [
         "shellscript"

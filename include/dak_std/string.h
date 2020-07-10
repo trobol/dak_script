@@ -1,61 +1,109 @@
 #ifndef _DAK_STD_STRING_H
 #define _DAK_STD_STRING_H
 
-#include <cstdlib>
-#include <cstring>
+#include <ostream>
 
 namespace dak_std
 {
 
-// TODO SSO
 class string
 {
+
 private:
-	union {
-		struct
+	union Data {
+		struct NonSSO
 		{
 			char *ptr;
-			size_t size;
-			size_t capacity;
-		};
+			std::size_t size;
+			std::size_t capacity;
+		} non_sso;
+		struct SSO
+		{
+			char string[sizeof(NonSSO) / sizeof(char) - 1];
+			uint8_t size;
+		} sso;
 	} m_data;
 
 public:
+	using traits = std::char_traits<char>;
+
 	string() noexcept;
-	// allocated space will be size+1 for null terminator
-	string(size_t size) : string{'*', size} {}
-	string(const char c, size_t size) : m_data{nullptr, size, size}
-	{
-		m_data.ptr = static_cast<char *>(std::malloc(m_data.size + 1));
-		// TODO: check that memory was actually allocated
-		for (size_t i = 0; i < m_data.size; ++i)
-		{
-			m_data.ptr[m_data.size] = c;
-		}
-		m_data.ptr[m_data.size] = NULL;
-	}
-	string(char const *c_str, size_t size);
-	string(char const *c_str);
+
+	string(char const *string, std::size_t size);
+
+	string(char const *str);
+
 	string(const string &str);
-	string(string &&str) noexcept
+
+	string(string &&string) noexcept;
+
+	string &operator=(string const &other);
+
+	string &operator=(string &&other);
+
+	~string();
+
+	char const *data() const noexcept;
+
+	std::size_t size() const noexcept;
+
+	std::size_t capacity() const noexcept;
+
+	friend void swap(string &lhs, string &rhs)
 	{
-		m_data = str.m_data;
-		str.m_data.size = 0;
-		str.m_data.ptr = nullptr;
-		str.m_data.capacity = 0;
+		std::swap(lhs.m_data, rhs.m_data);
 	}
 
-	~string() { free(m_data.ptr); }
+private:
+	void set_moved_from();
 
-	string &operator=(string const &other) { return *this; }
+	// We are using sso if the last two bits are 0
+	bool sso() const noexcept;
 
-	char &operator[](size_t i) { return m_data.ptr[i]; }
+	// good
+	void set_sso_size(unsigned char size) noexcept;
+	// good
+	std::size_t sso_size() const noexcept;
 
-	size_t size() const noexcept { return m_data.size; }
-	size_t capacity() const noexcept { return m_data.capacity; }
+	void set_non_sso_data(std::size_t size, std::size_t capacity);
 
-	char const *data() const noexcept { return m_data.ptr; }
+	std::pair<std::size_t, std::size_t> read_non_sso_data() const;
+
+public:
+	static std::size_t const sso_capacity =
+	    sizeof(typename Data::NonSSO) / sizeof(char) - 1;
 };
+
+bool operator==(const string &lhs, const char *rhs) noexcept;
+
+bool operator==(const char *lhs, const string &rhs) noexcept;
+
+bool operator==(const string &lhs, const string &rhs) noexcept;
+
+std::ostream &operator<<(std::ostream &stream, const string &string);
+
 } // namespace dak_std
+
+namespace std
+{
+template <>
+struct hash<dak_std::string>
+{
+	std::size_t operator()(dak_std::string const &str) const noexcept
+	{
+		const unsigned A = 54059;
+		const unsigned B = 76963;
+		const unsigned FIRSTH = 37;
+		unsigned h = FIRSTH;
+		const char *c = str.data();
+		while (*c)
+		{
+			h = (h * A) ^ (c[0] * B);
+			c++;
+		}
+		return h;
+	}
+};
+} // namespace std
 
 #endif

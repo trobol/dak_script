@@ -35,7 +35,7 @@ enum Token_Value : uint32_t
 	TOKEN_SLASH = '/',
 	TOKEN_BACKSLASH = '\\',
 	TOKEN_SEMICOLON = ';',
-	TOKEN_LINE_FEED = '\n',
+	TOKEN_BREAK = '\n',
 	TOKEN_QUOTE = '"',
 
 	TOKEN_INDENT = 256,
@@ -52,9 +52,11 @@ enum Token_Value : uint32_t
 	TOKEN_KEYWORD_DEFER,
 	TOKEN_KEYWORD_STRUCT,
 	TOKEN_KEYWORD_TYPE,
-	TOKEN_KEYWORD_UNINITIALIZED,
-	TOKEN_KEYWORD_FUNCTION,
-	TOKEN_BREAK,
+	TOKEN_KEYWORD_UNINIT,
+	TOKEN_KEYWORD_FUNC,
+	TOKEN_KEYWORD_RETURN,
+	TOKEN_KEYWORD_NULL,
+	TOKEN_KEYWORD_NULLPTR,
 
 	TOKEN_ERROR,
 
@@ -111,6 +113,8 @@ struct Token_Pos
 };
 
 const char *token_value_to_name(Token_Value t);
+
+const char *token_type_to_name(Token_Type t);
 
 struct Token_Value_Hash
 {

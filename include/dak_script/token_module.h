@@ -12,12 +12,11 @@ struct Token_Module
 	dak_std::vector<Token> tokens;
 	dak_std::vector<Token_Pos> positions;
 	dak_std::vector<Token_Literal> literals;
-	const char *buffer;
-	uint32_t buffer_size;
+	dak_std::vector<dak_std::string> identifiers;
 
 	Token_Module(dak_std::vector<Token> &t, dak_std::vector<Token_Pos> &p,
-		     dak_std::vector<Token_Literal> &l, const char *b,
-		     uint32_t bs);
+		     dak_std::vector<Token_Literal> &l,
+		     dak_std::vector<dak_std::string> &i);
 
 	Token_Module(const Token_Module &) = delete;
 

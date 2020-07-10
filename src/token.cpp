@@ -32,18 +32,25 @@ const char *token_value_to_name(Token_Value t)
 			return "TOKEN_KEYWORD_DEFER";
 		case TOKEN_KEYWORD_STRUCT:
 			return "TOKEN_KEWORD_STRUCT";
-		case TOKEN_KEYWORD_FUNCTION:
+		case TOKEN_KEYWORD_FUNC:
 			return "TOKEN_KEYWORD_FUNC";
 		case TOKEN_KEYWORD_TYPE:
 			return "TOKEN_KEYWORD_TYPE";
-		case TOKEN_KEYWORD_UNINITIALIZED:
-			return "TOKEN_KEYWORD_UNINITIALIZED";
+		case TOKEN_KEYWORD_UNINIT:
+			return "TOKEN_KEYWORD_UNINIT";
+		case TOKEN_KEYWORD_RETURN:
+			return "TOKEN_KEYWORD_RETURN";
+		case TOKEN_KEYWORD_NULL:
+			return "TOKEN_KEYWORD_NULL";
+		case TOKEN_KEYWORD_NULLPTR:
+			return "TOKEN_KEYWORD_NULLPTR";
 		case TOKEN_BREAK:
 			return "TOKEN_BREAK";
 		case TOKEN_ERROR:
 			return "TOKEN_ERROR";
 		case TOKEN_EOF:
 			return "TOKEN_EOF";
+
 		case TOKEN_AT:
 			return "@";
 		case TOKEN_OPEN_BRACKET:
@@ -61,6 +68,8 @@ const char *token_value_to_name(Token_Value t)
 			return ")";
 		case TOKEN_COMMA:
 			return ",";
+		case '-':
+			return "-";
 		case TOKEN_ASTERISK:
 			return "*";
 		case TOKEN_COLON:
@@ -71,10 +80,10 @@ const char *token_value_to_name(Token_Value t)
 			return "/";
 		case TOKEN_AMPERSAND:
 			return "&";
-		case TOKEN_LINE_FEED:
-			return "LINE FEED";
 		case TOKEN_BACKSLASH:
 			return "\\";
+		case TOKEN_DOT:
+			return ".";
 		case TOKEN_SEMICOLON:
 			return ";";
 		case TOKEN_QUOTE:
@@ -82,7 +91,21 @@ const char *token_value_to_name(Token_Value t)
 
 		default:
 			return "UNKNOWN_TOKEN";
-	} // namespace dak_script
-} // namespace dak_script
+	}
+}
+const char *token_type_to_name(Token_Type t)
+{
+	switch (t)
+	{
+		case TOKEN_TYPE_TOKEN:
+			return "token";
+		case TOKEN_TYPE_IDENTIFIER:
+			return "identifier";
+		case TOKEN_TYPE_LITERAL:
+			return "literal";
+		default:
+			return "error";
+	}
+}
 
 } // namespace dak_script

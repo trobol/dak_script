@@ -25,7 +25,7 @@ private:
 	uint32_t m_line_number;
 	uint32_t m_character_number;
 
-	dak_std::vector<substr> m_identifiers;
+	dak_std::vector<dak_std::string> m_identifiers;
 	dak_std::vector<Token_Literal> m_literals;
 
 	dak_std::vector<dak_std::string> m_string_literals;

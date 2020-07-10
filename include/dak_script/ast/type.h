@@ -1,6 +1,6 @@
 #ifndef _DAK_SCRIPT_AST_TYPE_H
 #define _DAK_SCRIPT_AST_TYPE_H
-#include <dak_script/ast/ast.h>
+#include "../ast.h"
 #include <dak_std/vector.h>
 
 namespace dak_script
