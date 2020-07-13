@@ -25,11 +25,37 @@ Parsed_Module *Parser::parse()
 	m_parsed_module->top_block = m_current_block;
 	Token &tok = peek_token();
 
-	parse_block();
+	AST_Statement *statement = parse_next_statement();
+	do
+	{
+		statement = parse_next_statement();
+
+		if (statement != nullptr)
+		{
+			m_current_block->statements.push_back(statement);
+		}
+	} while (!m_eof);
 
 	return m_parsed_module;
 }
 
+AST_Statement *Parser::parse_struct()
+{
+	AST_Statement_Block *block = new AST_Statement_Block();
+	block->parent = m_current_block;
+	m_current_block = block;
+}
+
+AST_Statement *Parser::parse_type_statement()
+{
+	Token &tok = pop_n_peek_token();
+	if (tok.type != TOKEN_TYPE_IDENTIFIER)
+	{
+		// TODO SYNTAX ERROR
+		return nullptr;
+	}
+	AST_Expression *expr = parse_next_expression();
+}
 AST_Statement *Parser::parse_next_statement()
 {
 	Token &tok = peek_token();
@@ -39,6 +65,12 @@ AST_Statement *Parser::parse_next_statement()
 		{
 			case TOKEN_KEYWORD_FUNC:
 				return parse_func_dec();
+			case '}':
+				end_block();
+				return nullptr;
+			case TOKEN_EOF:
+				m_eof = true;
+				return nullptr;
 			default:
 				pop_token();
 				break;
@@ -90,13 +122,23 @@ AST_Statement *Parser::parse_next_statement()
 			pop_token();
 		}
 	}
-	else if (tok.type == TOKEN_TYPE_LITERAL)
+	else
 	{
 		pop_token();
 		// TODO SYNTAX ERROR
 	}
 }
 
+void Parser::end_block()
+{
+	if (m_current_block->parent == nullptr)
+	{
+		syntax_error(m_token_module.positions[m_index],
+			     "unexpected '}' (end of block) after %s",
+			     token_value_to_name(peek_token(-1).value));
+	}
+	m_current_block = m_current_block->parent;
+}
 AST_Variable *Parser::find_variable(dak_std::string &name)
 {
 	AST_Statement_Block *block = m_current_block;
@@ -116,6 +158,7 @@ AST_Expression *Parser::parse_func_expr(dak_std::string &name) {}
 AST_Expression *Parser::parse_num_expr() {}
 AST_Expression *Parser::parse_paren_expr() {}
 
+AST_TY
 AST_Function *Parser::parse_func_dec()
 {
 	Token &tok = pop_n_peek_token();
@@ -156,6 +199,7 @@ AST_Function *Parser::parse_func_dec()
 			syntax_error(m_token_module.positions[m_index],
 				     "expected identifer got %s",
 				     token_type_to_name(name_tok.type));
+			return nullptr;
 		}
 		Token colon = pop_n_peek_token();
 		if (colon != TOKEN_COLON)
@@ -163,6 +207,7 @@ AST_Function *Parser::parse_func_dec()
 			// TODO SYNTAX ERROR
 			syntax_error(m_token_module.positions[m_index],
 				     "Syntax error, expected colon");
+			return nullptr;
 		}
 
 		Token &type_tok = pop_n_peek_token();
@@ -172,6 +217,7 @@ AST_Function *Parser::parse_func_dec()
 			syntax_error(m_token_module.positions[m_index],
 				     "expected identifer got %s",
 				     token_type_to_name(type_tok.type));
+			return nullptr;
 		}
 
 		AST_Variable *param = func->add_parameter(name);
@@ -189,6 +235,7 @@ AST_Function *Parser::parse_func_dec()
 				syntax_error(m_token_module.positions[m_index],
 					     "expected comma got %s",
 					     token_value_to_name(punct.value));
+				return nullptr;
 			}
 		}
 		else
@@ -197,6 +244,7 @@ AST_Function *Parser::parse_func_dec()
 			syntax_error(m_token_module.positions[m_index],
 				     "expected token got %s",
 				     token_type_to_name(punct.type));
+			return nullptr;
 		}
 		pop_token();
 	}
@@ -283,7 +331,7 @@ AST_Expression *Parser::parse_next_expression()
 			}
 		}
 	}
-	else if (tok.type == TOKEN_TYPE_LITERAL)
+	else
 	{
 		pop_token();
 	}

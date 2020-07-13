@@ -24,11 +24,8 @@ type Vector struct {
 }
 */
 
-function something(val: f32) f32 {
+func something(val: f32) f32 {
     list : Vector
-    
-    
-
 }
 
 obj . func ( )

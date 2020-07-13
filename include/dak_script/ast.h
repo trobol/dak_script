@@ -21,10 +21,6 @@ struct AST_Expression
 {
 };
 
-struct AST_Type
-{
-};
-
 // top level
 struct AST_Statement
 {
@@ -69,6 +65,15 @@ struct AST_Statement_Block : public AST_Statement
 	AST_Function *add_function(dak_std::string &name);
 
 	~AST_Statement_Block();
+};
+
+struct AST_Type
+{
+	dak_std::string name;
+};
+
+struct AST_Struct : public AST_Statement_Block
+{
 };
 
 struct AST_Function : public AST_Statement_Block

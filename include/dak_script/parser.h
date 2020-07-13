@@ -32,9 +32,11 @@ class Parser
 
 	Parsed_Module *m_parsed_module;
 
+	bool m_eof;
+
 public:
 	Parser(Token_Module &token_module)
-	    : m_index{0}, m_token_module{token_module}
+	    : m_index{0}, m_token_module{token_module}, m_eof{false}
 	{
 	}
 	Parsed_Module *parse();
@@ -48,11 +50,15 @@ private:
 	AST_Expression *parse_paren_expr();
 
 	AST_Statement *parse_next_statement();
+	AST_Statement *parse_struct();
+	AST_Statement *parse_type_statement();
 	AST_Declaration_Statement *parse_dec_statement(dak_std::string &);
 	AST_Assign_Statement *parse_assign_statement(dak_std::string &);
 	AST_Statement *parse_void_fuc_statement(dak_std::string &);
 
 	AST_Function *parse_func_dec();
+
+	void end_block();
 
 	void parse_block();
 
