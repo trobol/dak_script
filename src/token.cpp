@@ -1,10 +1,27 @@
 #include <dak_script/token.h>
 
+#include <dak_script/token_module.h>
 #include <iostream>
 #include <unordered_map>
 
 namespace dak_script
 {
+
+dak_std::string token_to_string(Token t, Token_Module *m)
+{
+	if (t.type == TOKEN_TYPE_TOKEN)
+	{
+		return token_value_to_name(t.value);
+	}
+	else if (t.type == TOKEN_TYPE_IDENTIFIER)
+	{
+		return m->identifiers[t.index];
+	}
+	else if (t.type == TOKEN_TYPE_LITERAL)
+	{
+		return "literal";
+	}
+}
 
 const char *token_value_to_name(Token_Value t)
 {

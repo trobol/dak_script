@@ -1,11 +1,14 @@
 #ifndef _DAK_STD_FILESYSTEM_H
 #define _DAK_STD_FILESYSTEM_H
 
-#include <string>
+#include <dak_std/string.h>
 
 namespace dak_std
 {
-std::string get_working_directory();
+dak_std::string get_working_directory();
+
+bool is_directory(const dak_std::string &);
+
 } // namespace dak_std
 
 #endif

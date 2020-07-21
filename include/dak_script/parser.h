@@ -28,7 +28,7 @@ class Parser
 
 	Token_Module &m_token_module;
 
-	AST_Statement_Block *m_current_block;
+	AST_Base_Block *m_current_block;
 
 	Parsed_Module *m_parsed_module;
 
@@ -48,9 +48,10 @@ private:
 	AST_Expression *parse_func_expr(dak_std::string &);
 	AST_Expression *parse_num_expr();
 	AST_Expression *parse_paren_expr();
+	AST_Expression *parse_struct_construct_expr(dak_std::string &);
 
 	AST_Statement *parse_next_statement();
-	AST_Statement *parse_struct();
+	AST_Statement *parse_struct(AST_Type *);
 	AST_Statement *parse_type_statement();
 	AST_Declaration_Statement *parse_dec_statement(dak_std::string &);
 	AST_Assign_Statement *parse_assign_statement(dak_std::string &);
@@ -71,6 +72,20 @@ private:
 	{
 		++m_index;
 		return peek_token();
+	}
+	void pop_line()
+	{
+		Token tok;
+		do
+		{
+			tok = peek_token();
+			if (tok == TOKEN_EOF)
+			{
+				m_eof = true;
+				return;
+			}
+			pop_token();
+		} while (tok != TOKEN_BREAK);
 	}
 	void pop_token() { ++m_index; }
 	void pop_token(size_t i) { m_index += i; }

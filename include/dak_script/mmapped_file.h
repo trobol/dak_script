@@ -2,7 +2,8 @@
 #define _DAK_SCRIPT_MAPPED_FILE_H
 
 #include <dak_script/file_descriptor.h>
-#include <string>
+#include <dak_std/error.h>
+#include <dak_std/string.h>
 
 namespace dak_script
 {
@@ -24,7 +25,9 @@ public:
 
 	size_t size() const { return m_size; }
 	const char *data() const { return m_data; }
-	int unmap();
+	dak_std::error unmap();
+
+	~mmapped_file();
 };
 
 } // namespace dak_script

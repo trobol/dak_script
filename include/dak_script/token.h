@@ -116,6 +116,9 @@ const char *token_value_to_name(Token_Value t);
 
 const char *token_type_to_name(Token_Type t);
 
+class Token_Module;
+dak_std::string token_to_string(Token t, Token_Module *m);
+
 struct Token_Value_Hash
 {
 	size_t operator()(Token_Value const &s) const noexcept { return s; }

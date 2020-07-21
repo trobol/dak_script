@@ -1,4 +1,6 @@
 #include <dak_script/mmapped_file.h>
+#include <dak_std/assert.h>
+#include <dak_std/error.h>
 
 #ifdef __unix__
 #include <fcntl.h>
@@ -12,16 +14,18 @@
 
 namespace dak_script
 {
-#ifdef __unix__
-
 mmapped_file::mmapped_file(file_descriptor &fd, size_t size, const char *data)
     : m_fd{fd}, m_size{size}, m_data{data}
 {
 }
+
 mmapped_file mmapped_file::map(file_descriptor &fd)
 {
 	return mmapped_file::map(fd, fd.size());
 }
+
+mmapped_file::~mmapped_file() {}
+#ifdef __unix__
 
 mmapped_file mmapped_file::map(file_descriptor &fd, size_t length)
 {
@@ -33,7 +37,21 @@ mmapped_file mmapped_file::map(file_descriptor &fd, size_t length)
 	return mmapped_file(fd, length, static_cast<const char *>(ptr));
 }
 
-int mmapped_file::unmap() { return munmap((void *)m_data, m_size); }
+dak_std::error mmapped_file::unmap()
+{
+	int err = munmap((void *)m_data, m_size);
+	m_data = nullptr;
+	m_size = 0;
+
+	if (err == 0)
+	{
+		return dak_std::error();
+	}
+	else
+	{
+		return dak_std::make_error();
+	}
+}
 
 #elif defined(WIN32) || defined(_WIN32)
 

@@ -2,6 +2,8 @@
 #include <dak_script/parser.h>
 #include <stdarg.h>
 
+#include <dak_script/ast_expression.h>
+
 namespace dak_script
 {
 
@@ -21,8 +23,9 @@ void syntax_error(Token_Pos &pos, const char *fmt, ...)
 Parsed_Module *Parser::parse()
 {
 	m_parsed_module = new Parsed_Module();
-	m_current_block = new AST_Statement_Block();
-	m_parsed_module->top_block = m_current_block;
+	AST_Statement_Block *top_block = new AST_Statement_Block();
+	m_parsed_module->top_block = top_block;
+	m_current_block = top_block;
 	Token &tok = peek_token();
 
 	AST_Statement *statement = parse_next_statement();
@@ -32,18 +35,20 @@ Parsed_Module *Parser::parse()
 
 		if (statement != nullptr)
 		{
-			m_current_block->statements.push_back(statement);
+			m_current_block->add_statement(statement);
 		}
 	} while (!m_eof);
 
 	return m_parsed_module;
 }
 
-AST_Statement *Parser::parse_struct()
+AST_Statement *Parser::parse_struct(AST_Type *type)
 {
-	AST_Statement_Block *block = new AST_Statement_Block();
+	AST_Struct_Block *block = new AST_Struct_Block(type);
 	block->parent = m_current_block;
 	m_current_block = block;
+	pop_token(2);
+	return nullptr;
 }
 
 AST_Statement *Parser::parse_type_statement()
@@ -54,7 +59,19 @@ AST_Statement *Parser::parse_type_statement()
 		// TODO SYNTAX ERROR
 		return nullptr;
 	}
-	AST_Expression *expr = parse_next_expression();
+	dak_std::string &name = m_token_module.identifiers[tok.index];
+	AST_Type *type = m_current_block->add_type(name);
+	tok = pop_n_peek_token();
+	if (tok == TOKEN_KEYWORD_STRUCT)
+	{
+		parse_struct(type);
+		return nullptr;
+	}
+	else
+	{
+		// TODO SYNTAX ERROR
+	}
+	return nullptr;
 }
 AST_Statement *Parser::parse_next_statement()
 {
@@ -65,6 +82,8 @@ AST_Statement *Parser::parse_next_statement()
 		{
 			case TOKEN_KEYWORD_FUNC:
 				return parse_func_dec();
+			case TOKEN_KEYWORD_TYPE:
+				return parse_type_statement();
 			case '}':
 				end_block();
 				return nullptr;
@@ -127,21 +146,26 @@ AST_Statement *Parser::parse_next_statement()
 		pop_token();
 		// TODO SYNTAX ERROR
 	}
+	return nullptr;
 }
 
 void Parser::end_block()
 {
-	if (m_current_block->parent == nullptr)
+	if (m_current_block->parent != nullptr)
 	{
-		syntax_error(m_token_module.positions[m_index],
+		m_current_block = m_current_block->parent;
+	}
+	else
+	{
+		syntax_error(m_token_module.positions[m_index - 1],
 			     "unexpected '}' (end of block) after %s",
 			     token_value_to_name(peek_token(-1).value));
 	}
-	m_current_block = m_current_block->parent;
+	pop_token();
 }
 AST_Variable *Parser::find_variable(dak_std::string &name)
 {
-	AST_Statement_Block *block = m_current_block;
+	AST_Base_Block *block = m_current_block;
 
 	while (block != nullptr)
 	{
@@ -152,13 +176,89 @@ AST_Variable *Parser::find_variable(dak_std::string &name)
 		}
 		block = block->parent;
 	}
+	return nullptr;
 }
 
-AST_Expression *Parser::parse_func_expr(dak_std::string &name) {}
-AST_Expression *Parser::parse_num_expr() {}
-AST_Expression *Parser::parse_paren_expr() {}
+AST_Expression *Parser::parse_func_expr(dak_std::string &name)
+{
+	return nullptr;
+}
+AST_Expression *Parser::parse_num_expr() { return nullptr; }
+AST_Expression *Parser::parse_paren_expr() { return nullptr; }
 
-AST_TY
+AST_Expression *Parser::parse_struct_construct_expr(dak_std::string &name)
+{
+	// get type
+	AST_Type *type = m_current_block->find_type(name);
+
+	AST_Struct_Construct_Expression *struct_expr =
+	    new AST_Struct_Construct_Expression(type);
+
+	dak_std::string prop;
+	// Type{var_name = var_value };
+
+	pop_token();
+	while (true)
+	{
+		Token tok = peek_token();
+		if (tok.type == TOKEN_TYPE_IDENTIFIER)
+		{
+			prop = dak_std::string(
+			    m_token_module.identifiers[tok.index]);
+		}
+		else
+		{
+			syntax_error(m_token_module.positions[m_index],
+				     "expected identifier, got %s",
+				     token_to_string(tok, &m_token_module));
+		}
+
+		tok = pop_n_peek_token();
+		if (tok != TOKEN_EQUALS)
+		{
+
+			syntax_error(m_token_module.positions[m_index],
+				     "exprected =, got %s",
+				     token_to_string(tok, &m_token_module));
+		}
+
+		tok = pop_n_peek_token();
+		if (tok.type == TOKEN_TYPE_IDENTIFIER)
+		{
+			AST_Expression *expr = parse_next_expression();
+
+			struct_expr->properties.push_back(prop);
+			struct_expr->values.push_back(expr);
+		}
+		else
+		{
+			syntax_error(m_token_module.positions[m_index],
+				     "exprected identifier, got %s",
+				     token_to_string(tok, &m_token_module));
+		}
+
+		tok = pop_n_peek_token();
+		if (tok.type == TOKEN_TYPE_TOKEN)
+		{
+			if (tok.value == TOKEN_COMMA)
+			{
+				pop_token();
+				continue;
+			}
+			else if (tok.value == '}')
+			{
+				pop_token();
+				break;
+			}
+		}
+
+		syntax_error(m_token_module.positions[m_index],
+			     "exprected identifier, got %s",
+			     token_to_string(tok, &m_token_module));
+	}
+	return nullptr;
+}
+
 AST_Function *Parser::parse_func_dec()
 {
 	Token &tok = pop_n_peek_token();
@@ -167,91 +267,149 @@ AST_Function *Parser::parse_func_dec()
 		// TODO SYNTAX ERROR
 		return nullptr;
 	}
-	dak_std::string &name = m_token_module.identifiers[tok.index];
+	dak_std::string &func_name = m_token_module.identifiers[tok.index];
 
-	AST_Function *func = m_current_block->add_function(name);
+	AST_Function *func = m_current_block->add_function(func_name);
 
 	func->parent = m_current_block;
 
 	tok = pop_n_peek_token();
 
-	if (tok.type != TOKEN_TYPE_TOKEN)
+	if (tok != TOKEN_OPEN_PAREN)
 	{
 		// TODO SYNTAX ERROR
 		syntax_error(m_token_module.positions[m_index],
 			     "expected '(' got %s",
-			     token_type_to_name(tok.type));
+			     token_to_string(tok, &m_token_module));
 	}
-	else if (tok.value != TOKEN_OPEN_PAREN)
-	{
-		// TODO SYNTAX ERROR
-		syntax_error(m_token_module.positions[m_index],
-			     "expected '(' got %s",
-			     token_value_to_name(tok.value));
-	}
+	// parse parameters
 	// (name: Type, name: Type)
-	while (true)
+	tok = peek_token(1);
+	if (tok != TOKEN_CLOSE_PAREN)
 	{
-		Token &name_tok = pop_n_peek_token();
-		if (name_tok.type != TOKEN_TYPE_IDENTIFIER)
+		while (true)
 		{
-			// TODO SYNTAX ERROR
-			syntax_error(m_token_module.positions[m_index],
-				     "expected identifer got %s",
-				     token_type_to_name(name_tok.type));
-			return nullptr;
-		}
-		Token colon = pop_n_peek_token();
-		if (colon != TOKEN_COLON)
-		{
-			// TODO SYNTAX ERROR
-			syntax_error(m_token_module.positions[m_index],
-				     "Syntax error, expected colon");
-			return nullptr;
-		}
-
-		Token &type_tok = pop_n_peek_token();
-		if (type_tok.type != TOKEN_TYPE_IDENTIFIER)
-		{
-			// TODO SYNTAX ERROR
-			syntax_error(m_token_module.positions[m_index],
-				     "expected identifer got %s",
-				     token_type_to_name(type_tok.type));
-			return nullptr;
-		}
-
-		AST_Variable *param = func->add_parameter(name);
-
-		Token punct = pop_n_peek_token();
-		if (punct.type == TOKEN_TYPE_TOKEN)
-		{
-			if (punct.value == TOKEN_CLOSE_PAREN)
-			{
-				break;
-			}
-			else if (punct.value != TOKEN_COMMA)
+			Token &name_tok = pop_n_peek_token();
+			if (name_tok.type != TOKEN_TYPE_IDENTIFIER)
 			{
 				// TODO SYNTAX ERROR
 				syntax_error(m_token_module.positions[m_index],
-					     "expected comma got %s",
-					     token_value_to_name(punct.value));
+					     "expected identifer got %s",
+					     token_type_to_name(name_tok.type));
+				return nullptr;
+			}
+			Token colon = pop_n_peek_token();
+			if (colon != TOKEN_COLON)
+			{
+				// TODO SYNTAX ERROR
+				syntax_error(m_token_module.positions[m_index],
+					     "Syntax error, expected colon");
+				return nullptr;
+			}
+
+			Token &type_tok = pop_n_peek_token();
+			if (type_tok.type != TOKEN_TYPE_IDENTIFIER)
+			{
+				// TODO SYNTAX ERROR
+				syntax_error(m_token_module.positions[m_index],
+					     "expected identifer got %s",
+					     token_type_to_name(type_tok.type));
+				return nullptr;
+			}
+			dak_std::string &param_name =
+			    m_token_module.identifiers[type_tok.index];
+			AST_Variable *param = func->add_parameter(param_name);
+
+			Token punct = pop_n_peek_token();
+			if (punct.type == TOKEN_TYPE_TOKEN)
+			{
+				if (punct.value == TOKEN_CLOSE_PAREN)
+				{
+					pop_token();
+					break;
+				}
+				else if (punct.value != TOKEN_COMMA)
+				{
+					// TODO SYNTAX ERROR
+					syntax_error(
+					    m_token_module.positions[m_index],
+					    "expected comma got %s",
+					    token_value_to_name(punct.value));
+					return nullptr;
+				}
+			}
+			else
+			{
+				// TODO SYNTAX ERROR
+				syntax_error(m_token_module.positions[m_index],
+					     "expected token got %s",
+					     token_type_to_name(punct.type));
+				return nullptr;
+			}
+			pop_token();
+		}
+	}
+	else
+	{
+		pop_token(2);
+	}
+
+	tok = peek_token();
+	if (tok.type == TOKEN_TYPE_IDENTIFIER)
+	{
+		dak_std::string &type_name =
+		    m_token_module.identifiers[tok.index];
+		AST_Type *type = m_current_block->find_type(type_name);
+		func->add_return(type);
+	}
+	else if (tok == TOKEN_OPEN_PAREN)
+	{
+		pop_token();
+		// parse return type(s)
+		while (true)
+		{
+			Token &type_name = peek_token();
+			if (type_name.type == TOKEN_TYPE_IDENTIFIER)
+			{
+				dak_std::string &type_name =
+				    m_token_module.identifiers[tok.index];
+				AST_Type *type =
+				    m_current_block->find_type(type_name);
+				func->add_return(type);
+			}
+			else
+			{
+				syntax_error(
+				    m_token_module.positions[m_index],
+				    "unexpected %s in function declaration ",
+				    token_to_string(type_name,
+						    &m_token_module));
+				return nullptr;
+			}
+
+			Token &punct = pop_n_peek_token();
+			if (punct == TOKEN_CLOSE_PAREN)
+			{
+				break;
+			}
+			else if (punct != TOKEN_COMMA)
+			{
+				syntax_error(
+				    m_token_module.positions[m_index],
+				    "unexpected %s in function returns "
+				    "declaration",
+				    token_to_string(punct, &m_token_module));
+
 				return nullptr;
 			}
 		}
-		else
-		{
-			// TODO SYNTAX ERROR
-			syntax_error(m_token_module.positions[m_index],
-				     "expected token got %s",
-				     token_type_to_name(punct.type));
-			return nullptr;
-		}
-		pop_token();
 	}
-
-	parse_block();
-
+	else if (tok != TOKEN_OPEN_BRACKET)
+	{
+		// Syntax error
+	}
 	m_current_block = func;
+	return nullptr;
 }
 
 void Parser::parse_block()
@@ -275,7 +433,7 @@ AST_Expression *Parser::parse_next_expression()
 		switch (tok.value)
 		{
 			case TOKEN_EOF:
-				// TODO EOF
+				m_eof = true;
 				break;
 			default:
 				pop_token();
@@ -306,11 +464,11 @@ AST_Expression *Parser::parse_next_expression()
 					pop_token();
 					break;
 				case '(':
-					parse_func_expr(name);
-					break;
+					return parse_func_expr(name);
+
 				case '{':
-					// TODO object construction
-					pop_token();
+					return parse_struct_construct_expr(
+					    name);
 					break;
 				case '[':
 					// TODO array access
@@ -322,6 +480,7 @@ AST_Expression *Parser::parse_next_expression()
 				case '-':
 					// TODO math operation
 					// assignment (+=...)
+
 					pop_token();
 					break;
 				default:
@@ -335,6 +494,7 @@ AST_Expression *Parser::parse_next_expression()
 	{
 		pop_token();
 	}
+	return nullptr;
 }
 AST_Declaration_Statement *Parser::parse_dec_statement(dak_std::string &name)
 {
@@ -359,8 +519,9 @@ AST_Declaration_Statement *Parser::parse_dec_statement(dak_std::string &name)
 
 	if (peek_token() == TOKEN_BREAK)
 	{
-		m_current_block->statements.push_back(var_dec);
+		m_current_block->add_statement(var_dec);
 	}
+	return nullptr;
 }
 AST_Assign_Statement *Parser::parse_assign_statement(dak_std::string &name)
 {
@@ -375,12 +536,14 @@ AST_Assign_Statement *Parser::parse_assign_statement(dak_std::string &name)
 
 	if (peek_token() == TOKEN_BREAK)
 	{
-		m_current_block->statements.push_back(var_assign);
+		m_current_block->add_statement(var_assign);
 	}
+	return nullptr;
 }
 AST_Statement *Parser::parse_void_fuc_statement(dak_std::string &name)
 {
 	pop_token(2);
+	return nullptr;
 }
 
 } // namespace dak_script
