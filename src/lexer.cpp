@@ -83,7 +83,7 @@ Token_Module Lexer::lex()
 		m_tokens.push_back(token);
 		m_positions.push_back(
 		    Token_Pos{m_line_number, m_character_number});
-	} while (token.type != TOKEN_TYPE_TOKEN || token.value != TOKEN_EOF);
+	} while (token != TOKEN_EOF);
 
 	return Token_Module(m_tokens, m_positions, m_literals, m_identifiers);
 }
@@ -239,10 +239,7 @@ Token Lexer::parse_slash()
 		pop_char(2);
 		return token;
 	}
-	else
-	{
-		return make_token(static_cast<Token_Value>(c));
-	}
+	return make_token(TOKEN_EMPTY);
 }
 
 void Lexer::break_line()

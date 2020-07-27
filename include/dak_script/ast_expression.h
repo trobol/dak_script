@@ -8,6 +8,14 @@ namespace dak_script
 {
 struct AST_Type;
 
+enum AST_Expression_Type
+{
+	AST_EXPRESSION_TYPE_BOP,
+	AST_EXPRESSION_TYPE_UOP,
+	AST_EXPRESSION_TYPE_PAREN,
+	AST_EXPRESSION_TYPE_VALUE,
+	AST_EXPRESSION_TYPE_FUNC_CALL
+};
 struct AST_Expression
 {
 };
@@ -15,11 +23,28 @@ struct AST_Struct_Construct_Expression : public AST_Expression
 {
 	dak_std::vector<dak_std::string> properties;
 	dak_std::vector<AST_Expression *> values;
-	AST_Type *type;
+	AST_Type *construct_type;
 
-	AST_Struct_Construct_Expression(AST_Type *t) : type{t} {}
+	AST_Struct_Construct_Expression(AST_Type *t) : construct_type{t} {}
 };
 
+struct AST_Variable;
+struct AST_Variable_Expression : public AST_Expression
+{
+	AST_Variable *ptr;
+	AST_Variable_Expression(AST_Variable *v) : ptr{v} {};
+};
+
+struct AST_Literal_Expression : public AST_Expression
+{
+	AST_Literal_Expression() {}
+};
+
+struct AST_Subscript_Operator
+{
+	AST_Variable *var;
+	AST_Expression *expr;
+};
 enum AST_BOPERATOR
 {
 	AST_BOP_ADD,
@@ -37,7 +62,8 @@ struct AST_BOP_Expression
 
 enum AST_UOPERATOR
 {
-	AST_UOP_NOT
+	AST_UOP_NOT,
+	AST_UOP_PAREN,
 };
 struct AST_UOP_Expression
 {

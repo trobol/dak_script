@@ -1,4 +1,3 @@
-import test.file as 
 
 @Buildable
 type Test struct {
@@ -14,6 +13,7 @@ func test_function (val: f32) f32 {
     val2 := f32(val) - 1.0
     return val2
 }
+
 
 
 func construct() {

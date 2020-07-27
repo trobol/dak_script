@@ -7,11 +7,11 @@
 namespace dak_script
 {
 
-void syntax_error(Token_Pos &pos, const char *fmt, ...)
+void Parser::syntax_error(Token_Pos &pos, const char *fmt, ...)
 {
 	char buffer[500];
-	sprintf(buffer, "Syntax error at %i:%i, %s\n", pos.line_number,
-		pos.character_number, fmt);
+	sprintf(buffer, "Syntax error at %s:%i:%i, %s\n", m_filename,
+		pos.line_number, pos.character_number, fmt);
 	va_list argptr;
 	va_start(argptr, fmt);
 	vprintf(buffer, argptr);
@@ -185,6 +185,8 @@ AST_Expression *Parser::parse_func_expr(dak_std::string &name)
 }
 AST_Expression *Parser::parse_num_expr() { return nullptr; }
 AST_Expression *Parser::parse_paren_expr() { return nullptr; }
+
+AST_Expression *Parser::parse_bop_expr() {}
 
 AST_Expression *Parser::parse_struct_construct_expr(dak_std::string &name)
 {
@@ -424,78 +426,180 @@ void Parser::parse_block()
 	pop_token();
 }
 
+AST_Expression *Parser::parse_uop_expr() {}
+
+enum parser_expression_type
+{
+	EXPR_TYPE_BASIC,
+	EXPR_TYPE_BOP,
+	EXPR_TYPE_PAREN,
+	EXPR_TYPE_UOP,
+	EXPR_TYPE_CONSTRUCT,
+};
+struct parser_expression_info
+{
+	AST_Expression *ptr;
+	parser_expression_type type;
+	bool closed = false;
+};
+
+// iterative expression parser
 AST_Expression *Parser::parse_next_expression()
 {
+	dak_std::vector<parser_expression_info> expression_stack;
 
-	Token &tok = peek_token();
-	if (tok.type == TOKEN_TYPE_TOKEN)
+	while (true)
 	{
-		switch (tok.value)
+		Token &tok = peek_token();
+		if (tok.type == TOKEN_TYPE_LITERAL)
 		{
-			case TOKEN_EOF:
-				m_eof = true;
-				break;
-			default:
-				pop_token();
-				break;
-		}
-	}
-	else if (tok.type == TOKEN_TYPE_IDENTIFIER)
-	{
-		dak_std::string &name = m_token_module.identifiers[tok.index];
-		Token &next_tok = peek_token(1);
-		if (next_tok.type == TOKEN_TYPE_IDENTIFIER)
-		{
-			// TODO process syntax error
-			printf("Error identifier: %s unexpected", name);
-		}
-		else
-		{
-			switch (next_tok.value)
+			AST_Expression *expr = new AST_Expression();
+
+			if (expression_stack.size() == 0)
 			{
-				case '=':
-					parse_assign_statement(name);
+				expression_stack.push_back(
+				    {expr, EXPR_TYPE_BASIC, true});
+			}
+			else if (!expression_stack.end()->closed)
+			{
+				// expression_stack.end()->ptr->
+			}
+			else
+			{
+			}
+
+			continue;
+		}
+		if (tok.type == TOKEN_TYPE_TOKEN)
+		{
+			parser_expression_info expr_info;
+			switch (tok.value)
+			{
+				case TOKEN_BREAK:
+					return expression_stack.begin()->ptr;
+				case TOKEN_EOF:
+					m_eof = true;
+					return nullptr;
+				case '(':
+					expr_info = {parse_paren_expr(),
+						     EXPR_TYPE_PAREN, false};
 					break;
-				case ':':
-					parse_dec_statement(name);
+				case ')':
+
+					break;
+				case '!':
+					expr_info = {parse_uop_expr(),
+						     EXPR_TYPE_UOP, true};
 					break;
 				case '.':
 					// TODO handle dot operator
-					pop_token();
 					break;
-				case '(':
-					return parse_func_expr(name);
-
-				case '{':
-					return parse_struct_construct_expr(
-					    name);
-					break;
-				case '[':
-					// TODO array access
-					pop_token();
+				case '-':
+					if (peek_token(1).type ==
+					    TOKEN_TYPE_LITERAL)
+					{
+					}
 					break;
 				case '*':
+					// TODO handle dereference
+					break;
+				case '&':
+					// TODO handle reference
+					break;
 				case '/':
 				case '+':
-				case '-':
+
 					// TODO math operation
 					// assignment (+=...)
 
+					return parse_bop_expr();
 					pop_token();
 					break;
 				default:
-					// TODO syntax error
-					pop_token();
-					break;
+					syntax_error(
+					    m_token_module.positions[m_index],
+					    "unhandled token");
+					return nullptr;
 			}
+			pop_token();
+			expression_stack.push_back(expr_info);
+			continue;
 		}
-	}
-	else
-	{
-		pop_token();
+
+		if (tok.type == TOKEN_TYPE_IDENTIFIER)
+		{
+			dak_std::string &name =
+			    m_token_module.identifiers[tok.index];
+			Token &next_tok = peek_token(1);
+			AST_Expression *expr;
+
+			if (next_tok.type == TOKEN_TYPE_TOKEN)
+			{
+				switch (next_tok.value)
+				{
+					case '(': // function call
+						parse_func_expr(name);
+						break;
+					case '[':
+						// subscript operator
+						// (arrayaccess)
+
+						break;
+					case '.': // dot operator
+						break;
+					case '{': // constructor
+						parse_struct_construct_expr(
+						    name);
+						break;
+					default:
+						syntax_error(
+						    m_token_module
+							.positions[m_index],
+						    "unexpected %s after "
+						    "\"%s\"",
+						    token_value_to_name(
+							next_tok.value),
+						    name.data());
+						break;
+				}
+			}
+			else
+			{
+				// TODO process syntax error
+				syntax_error(
+				    m_token_module.positions[m_index - 1],
+				    "unexpected '}' (end of block) after %s",
+				    token_value_to_name(peek_token(-1).value));
+
+				// TODO attempt to recover
+				return nullptr;
+			}
+			pop_token();
+		}
+		else if (tok.type == TOKEN_TYPE_LITERAL)
+		{
+			AST_Expression *expr = new AST_Literal_Expression();
+			expression_stack.push_back(
+			    {expr, AST_EXPRESSION_TYPE_VALUE});
+			pop_token();
+		}
+		/*
+			Token &next_tok = peek_token(1);
+			if (next_tok.type != TOKEN_TYPE_TOKEN)
+			{
+				// TODO process syntax error
+				syntax_error(m_token_module.positions[m_index -
+		   1], "unexpected '}' (end of block) after %s",
+					     token_value_to_name(peek_token(-1).value));
+
+				// TODO attempt to recover
+				return nullptr;
+			}
+			*/
 	}
 	return nullptr;
 }
+
 AST_Declaration_Statement *Parser::parse_dec_statement(dak_std::string &name)
 {
 	AST_Variable *var = m_current_block->add_variable(name);

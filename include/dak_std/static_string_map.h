@@ -80,9 +80,16 @@ public:
 		{
 			int m = l + (r - l) / 2;
 
-			if (str_less(m_data[m], str))
+			const char *lhs = m_data[m];
+			const char *rhs = str;
+			while (*lhs && *rhs && *lhs == *rhs)
+			{
+				++lhs;
+				++rhs;
+			}
+			if (*lhs < *rhs)
 				l = m + 1;
-			else if (str_equal(m_data[m], str))
+			else if (*lhs == *rhs)
 				return m_tokens[m];
 			else
 				r = m - 1;

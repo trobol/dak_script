@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	}
 	output.close();
 
-	Parser parser(mod);
+	Parser parser(mod, path);
 
 	Parsed_Module *parsed_module = parser.parse();
 

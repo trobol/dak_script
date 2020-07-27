@@ -34,9 +34,12 @@ class Parser
 
 	bool m_eof;
 
+	dak_std::string m_filename;
+
 public:
-	Parser(Token_Module &token_module)
-	    : m_index{0}, m_token_module{token_module}, m_eof{false}
+	Parser(Token_Module &token_module, dak_std::string filename)
+	    : m_index{0}, m_token_module{token_module}, m_eof{false},
+	      m_filename{filename}
 	{
 	}
 	Parsed_Module *parse();
@@ -49,6 +52,8 @@ private:
 	AST_Expression *parse_num_expr();
 	AST_Expression *parse_paren_expr();
 	AST_Expression *parse_struct_construct_expr(dak_std::string &);
+	AST_Expression *parse_bop_expr();
+	AST_Expression *parse_uop_expr();
 
 	AST_Statement *parse_next_statement();
 	AST_Statement *parse_struct(AST_Type *);
@@ -58,6 +63,8 @@ private:
 	AST_Statement *parse_void_fuc_statement(dak_std::string &);
 
 	AST_Function *parse_func_dec();
+
+	void syntax_error(Token_Pos &pos, const char *fmt, ...);
 
 	void end_block();
 
