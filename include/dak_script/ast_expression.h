@@ -10,34 +10,45 @@ struct AST_Type;
 
 enum AST_Expression_Type
 {
+	AST_EXPRESSION_TYPE_CONSTRUCT,
+	AST_EXPRESSION_TYPE_VARIABLE,
 	AST_EXPRESSION_TYPE_BOP,
 	AST_EXPRESSION_TYPE_UOP,
+	AST_EXPRESSION_TYPE_LITERAL,
 	AST_EXPRESSION_TYPE_PAREN,
 	AST_EXPRESSION_TYPE_VALUE,
 	AST_EXPRESSION_TYPE_FUNC_CALL
 };
 struct AST_Expression
 {
+	const AST_Expression_Type type;
+	AST_Expression(AST_Expression_Type t) : type{t} {}
 };
-struct AST_Struct_Construct_Expression : public AST_Expression
+struct AST_Construct_Expression : public AST_Expression
 {
 	dak_std::vector<dak_std::string> properties;
 	dak_std::vector<AST_Expression *> values;
 	AST_Type *construct_type;
 
-	AST_Struct_Construct_Expression(AST_Type *t) : construct_type{t} {}
+	AST_Construct_Expression(AST_Type *t) : AST_Expression(AST_EXPRESSION_TYPE_CONSTRUCT), construct_type{t} {}
 };
 
 struct AST_Variable;
 struct AST_Variable_Expression : public AST_Expression
 {
 	AST_Variable *ptr;
-	AST_Variable_Expression(AST_Variable *v) : ptr{v} {};
+	AST_Variable_Expression(AST_Variable *v) : AST_Expression(AST_EXPRESSION_TYPE_VARIABLE), ptr{v} {};
+};
+
+
+struct AST_Paren_Expression : public AST_Expression {
+	AST_Expression* expr;
+	AST_Paren_Expression() : AST_Expression(AST_EXPRESSION_TYPE_PAREN) {}
 };
 
 struct AST_Literal_Expression : public AST_Expression
 {
-	AST_Literal_Expression() {}
+	AST_Literal_Expression(): AST_Expression(AST_EXPRESSION_TYPE_LITERAL) {}
 };
 
 struct AST_Subscript_Operator
@@ -53,11 +64,13 @@ enum AST_BOPERATOR
 	AST_BOP_MULT,
 	AST_BOP_PAREN
 };
-struct AST_BOP_Expression
+struct AST_BOP_Expression : public AST_Expression
 {
 	AST_BOPERATOR bop;
 	AST_Expression *lhs;
 	AST_Expression *rhs;
+
+	AST_BOP_Expression() : AST_Expression(AST_EXPRESSION_TYPE_BOP) {}
 };
 
 enum AST_UOPERATOR
@@ -65,10 +78,11 @@ enum AST_UOPERATOR
 	AST_UOP_NOT,
 	AST_UOP_PAREN,
 };
-struct AST_UOP_Expression
+struct AST_UOP_Expression : public AST_Expression
 {
 	AST_UOPERATOR uop;
 	AST_Expression *expr;
+	AST_UOP_Expression() : AST_Expression(AST_EXPRESSION_TYPE_UOP) {}
 };
 struct AST_Call_Expression
 {

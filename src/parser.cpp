@@ -428,68 +428,38 @@ void Parser::parse_block()
 
 AST_Expression *Parser::parse_uop_expr() {}
 
-enum parser_expression_type
-{
-	EXPR_TYPE_BASIC,
-	EXPR_TYPE_BOP,
-	EXPR_TYPE_PAREN,
-	EXPR_TYPE_UOP,
-	EXPR_TYPE_CONSTRUCT,
-};
-struct parser_expression_info
-{
-	AST_Expression *ptr;
-	parser_expression_type type;
-	bool closed = false;
-};
-
 // iterative expression parser
 AST_Expression *Parser::parse_next_expression()
 {
-	dak_std::vector<parser_expression_info> expression_stack;
+	dak_std::vector<AST_Expression*> expression_stack;
 
 	while (true)
 	{
 		Token &tok = peek_token();
+		AST_Expression *expr = nullptr;
 		if (tok.type == TOKEN_TYPE_LITERAL)
 		{
-			AST_Expression *expr = new AST_Expression();
-
-			if (expression_stack.size() == 0)
-			{
-				expression_stack.push_back(
-				    {expr, EXPR_TYPE_BASIC, true});
-			}
-			else if (!expression_stack.end()->closed)
-			{
-				// expression_stack.end()->ptr->
-			}
-			else
-			{
-			}
-
-			continue;
+			expr = new AST_Literal_Expression();
 		}
-		if (tok.type == TOKEN_TYPE_TOKEN)
+		else if (tok.type == TOKEN_TYPE_TOKEN)
 		{
-			parser_expression_info expr_info;
+			
 			switch (tok.value)
 			{
 				case TOKEN_BREAK:
-					return expression_stack.begin()->ptr;
+					return expression_stack.front();
 				case TOKEN_EOF:
 					m_eof = true;
-					return nullptr;
+					// todo, ensure expression is fully closed
+					return expression_stack.front();
 				case '(':
-					expr_info = {parse_paren_expr(),
-						     EXPR_TYPE_PAREN, false};
+					expr = new AST_Paren_Expression();
 					break;
 				case ')':
 
 					break;
 				case '!':
-					expr_info = {parse_uop_expr(),
-						     EXPR_TYPE_UOP, true};
+					expr = new AST_UOP_Expression();
 					break;
 				case '.':
 					// TODO handle dot operator
@@ -509,11 +479,7 @@ AST_Expression *Parser::parse_next_expression()
 				case '/':
 				case '+':
 
-					// TODO math operation
-					// assignment (+=...)
-
-					return parse_bop_expr();
-					pop_token();
+					// error
 					break;
 				default:
 					syntax_error(
@@ -521,12 +487,8 @@ AST_Expression *Parser::parse_next_expression()
 					    "unhandled token");
 					return nullptr;
 			}
-			pop_token();
-			expression_stack.push_back(expr_info);
-			continue;
 		}
-
-		if (tok.type == TOKEN_TYPE_IDENTIFIER)
+		else if (tok.type == TOKEN_TYPE_IDENTIFIER)
 		{
 			dak_std::string &name =
 			    m_token_module.identifiers[tok.index];
@@ -576,13 +538,8 @@ AST_Expression *Parser::parse_next_expression()
 			}
 			pop_token();
 		}
-		else if (tok.type == TOKEN_TYPE_LITERAL)
-		{
-			AST_Expression *expr = new AST_Literal_Expression();
-			expression_stack.push_back(
-			    {expr, AST_EXPRESSION_TYPE_VALUE});
-			pop_token();
-		}
+		
+		
 		/*
 			Token &next_tok = peek_token(1);
 			if (next_tok.type != TOKEN_TYPE_TOKEN)

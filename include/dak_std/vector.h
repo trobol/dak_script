@@ -164,6 +164,9 @@ public:
 	const T *end() const noexcept { return m_end; }
 	T *begin() noexcept { return m_begin; }
 	T *end() noexcept { return m_end; }
+
+	T& front() const noexcept {return *m_begin; }
+	T& back() const noexcept { return *m_end; }
 };
 } // namespace dak_std
 
