@@ -36,6 +36,19 @@ struct AST_Statement
 {
 	virtual ~AST_Statement() {}
 	// virtual void codegen() = 0;
+	virtual void print(unsigned indent = 0)
+	{
+		const char buffer[50] = {};
+
+		if (indent > 50)
+			indent = 50;
+
+		for (unsigned i = 0; i < indent; i++)
+		{
+			buffer[i] == '\t';
+		}
+		printf("%s", buffer);
+	}
 };
 
 struct AST_Function;
@@ -188,6 +201,12 @@ public:
 	{
 	}
 	~AST_Declaration_Statement() { delete value; }
+	void print(unsigned indent = 0)
+	{
+		AST_Statement::print();
+		printf("Declaration Statement: %s \n", variable->name);
+		print_expression(value, indent);
+	}
 };
 
 struct AST_Assign_Statement : public AST_Statement
@@ -202,6 +221,8 @@ public:
 	}
 	~AST_Assign_Statement() { delete value; }
 };
+
+void print_statement(AST_Statement *s, int indent = 0);
 
 } // namespace dak_script
 

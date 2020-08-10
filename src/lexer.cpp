@@ -41,7 +41,7 @@ Token Lexer::make_literal(char *str)
 
 Lexer::Lexer(const char *data, size_t size)
     : m_data{data}, m_size{size}, m_index{0}, m_character_number{0},
-      m_line_number{static_cast<uint32_t>(0)} {};
+      m_line_number{static_cast<uint32_t>(1)} {};
 
 char Lexer::peek_char()
 {

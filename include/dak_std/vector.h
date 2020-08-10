@@ -147,6 +147,17 @@ public:
 		m_capacity = new_begin + size;
 	}
 
+	void pop_back()
+	{
+
+		if (m_end <= m_begin)
+			return;
+		m_end--;
+		if constexpr (!std::is_trivially_destructible_v<T>)
+		{
+			m_end->~T();
+		}
+	}
 	T &operator[](size_t i)
 	{
 		_dak_assert(i + m_begin >= m_end);
@@ -165,8 +176,8 @@ public:
 	T *begin() noexcept { return m_begin; }
 	T *end() noexcept { return m_end; }
 
-	T& front() const noexcept {return *m_begin; }
-	T& back() const noexcept { return *m_end; }
+	T &front() const noexcept { return *m_begin; }
+	T &back() const noexcept { return *(m_end - 1); }
 };
 } // namespace dak_std
 

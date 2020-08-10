@@ -93,6 +93,10 @@ int main(int argc, char *argv[])
 
 	printf("Statements: %u\n",
 	       parsed_module->top_block->statements().size());
+	for (AST_Statement *s : parsed_module->top_block->statements())
+	{
+		s->print();
+	}
 
 	printf("Variables:\n");
 	for (AST_Variable *var : parsed_module->top_block->variables())
