@@ -18,7 +18,7 @@ enum AST_Expression_Type
 	AST_EXPRESSION_TYPE_LITERAL,
 	AST_EXPRESSION_TYPE_PAREN,
 	AST_EXPRESSION_TYPE_VALUE,
-	AST_EXPRESSION_TYPE_FUNC_CALL
+	AST_EXPRESSION_TYPE_CALL
 };
 struct AST_Expression
 {
@@ -57,7 +57,8 @@ struct AST_Paren_Expression : public AST_Expression
 
 struct AST_Literal_Expression : public AST_Expression
 {
-	AST_Literal_Expression() : AST_Expression(AST_EXPRESSION_TYPE_LITERAL)
+	Token_Literal literal;
+	AST_Literal_Expression(Token_Literal l) : AST_Expression(AST_EXPRESSION_TYPE_LITERAL), literal{l}
 	{
 	}
 };
@@ -107,6 +108,8 @@ enum AST_UOPERATOR
 {
 	AST_UOP_NOT,
 	AST_UOP_PAREN,
+	AST_UOP_REFERENCE,
+	AST_UOP_DEREFERENCE
 };
 struct AST_UOP_Expression : public AST_Expression
 {

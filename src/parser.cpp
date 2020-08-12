@@ -434,6 +434,8 @@ AST_Expression *Parser::parse_next_expression()
 {
 	dak_std::vector<AST_Expression *> expression_stack;
 
+	AST_Expression *last_expr = nullptr;
+
 	while (true)
 	{
 		// parse first token
@@ -441,46 +443,49 @@ AST_Expression *Parser::parse_next_expression()
 		AST_Expression *expr = nullptr;
 		if (tok.type == TOKEN_TYPE_LITERAL)
 		{
-			expr = new AST_Literal_Expression();
+			expr = new AST_Literal_Expression(m_token_module.literals[tok.index]);
 		}
 		else if (tok.type == TOKEN_TYPE_TOKEN)
 		{
 
 			switch (tok.value)
 			{
-				case TOKEN_BREAK:
-					if (expression_stack.size() > 0)
-						return expression_stack.front();
-					else
-						return nullptr;
 				case TOKEN_EOF:
 					m_eof = true;
 					// todo, ensure expression is fully
 					// closed
-					return expression_stack.front();
+				case TOKEN_BREAK:
+					if (expression_stack.size() > 0)
+						// TODO syntax error
+						return nullptr;
+					else
+						return last_expr;
 				case '(':
-					expr = new AST_Paren_Expression();
+	
+					expression_stack.push_back(new AST_Paren_Expression());
 					break;
 				case ')':
 				{
-					AST_Expression *e = expression_stack
-					    [expression_stack.size() - 2];
-					if (e->type !=
-					    AST_EXPRESSION_TYPE_PAREN)
+					if (expression_stack.size() > 0 &&
+					    expression_stack.back()->type ==
+						AST_EXPRESSION_TYPE_PAREN)
+					{
+						AST_Paren_Expression
+						    *paren_expr = dynamic_cast<
+							AST_Paren_Expression *>(
+							expression_stack
+							    .back());
+
+						paren_expr->expr = last_expr;
+						    
+						expr = paren_expr;
+						expression_stack.pop_back();
+
+					}
+					else
 					{
 						// TODO syntax error
-						return nullptr;
 					}
-
-					AST_Paren_Expression *paren_expr =
-					    dynamic_cast<
-						AST_Paren_Expression *>(e);
-
-					paren_expr->expr =
-					    expression_stack.back();
-					expr = paren_expr;
-					expression_stack.pop_back();
-					expression_stack.pop_back();
 				}
 				break;
 				case '!':
@@ -489,23 +494,28 @@ AST_Expression *Parser::parse_next_expression()
 				case '.':
 					// TODO handle dot operator
 					break;
+				case '+':
 				case '-':
-					if (peek_token(1).type ==
-					    TOKEN_TYPE_LITERAL)
+				case '*':
+				case '/':
+				
+					if (last_expr == nullptr)
 					{
+						// it is a uop
+					}
+					else
+					{
+						AST_BOP_Expression *bop_expr =
+						    new AST_BOP_Expression(
+							tok.value);
+						bop_expr->lhs = last_expr;
+						expr = nullptr;
+						expression_stack.push_back(
+						    bop_expr);
 					}
 					break;
-				case '*':
-					// TODO handle dereference
-					break;
-				case '&':
-					// TODO handle reference
-					break;
-				case '/':
-				case '+':
+				
 
-					// error
-					break;
 				default:
 					syntax_error(
 					    m_token_module.positions[m_index],
@@ -520,102 +530,26 @@ AST_Expression *Parser::parse_next_expression()
 
 			AST_Variable *var = find_variable(name);
 			expr = new AST_Variable_Expression(var);
-
-			/*
-			if (next_tok.type == TOKEN_TYPE_TOKEN)
-			{
-				switch (next_tok.value)
-				{
-					case '(': // function call
-						parse_func_expr(name);
-						break;
-					case '[':
-						// subscript operator
-						// (arrayaccess)
-
-						break;
-					case '.': // dot operator
-						break;
-					case '{': // constructor
-						parse_struct_construct_expr(
-						    name);
-						break;
-					default:
-						syntax_error(
-						    m_token_module
-							.positions[m_index],
-						    "unexpected %s after "
-						    "\"%s\"",
-						    token_value_to_name(
-							next_tok.value),
-						    name.data());
-						break;
-				}
-			}
-			else
-			{
-				// TODO process syntax error
-				syntax_error(
-				    m_token_module.positions[m_index - 1],
-				    "unexpected '}' (end of block) after %s",
-				    token_value_to_name(peek_token(-1).value));
-
-				// TODO attempt to recover
-				return nullptr;
-			}
-			*/
 		}
 
-		if (expression_stack.size() > 0)
+		if (expression_stack.size() > 0 && expr != nullptr)
 		{
-			if (expression_stack.back()->type ==
-			    AST_EXPRESSION_TYPE_BOP)
+			AST_Expression *back = expression_stack.back();
+			if (back->type == AST_EXPRESSION_TYPE_BOP)
 			{
-
 				AST_BOP_Expression *bop_expr =
-				    dynamic_cast<AST_BOP_Expression *>(
-					expression_stack.back());
-				if (bop_expr->rhs == nullptr)
-				{
-					bop_expr->rhs = expr;
-				}
-				else
-				{
-					// TODO syntax error
-				}
-				expr = bop_expr;
+				    dynamic_cast<AST_BOP_Expression *>(back);
+				bop_expr->rhs = expr;
+				expr = back;
 				expression_stack.pop_back();
 			}
-		}
-
-		Token next_tok = pop_n_peek_token();
-		if (next_tok.type == TOKEN_TYPE_TOKEN)
-		{
-			switch (next_tok.value)
+			else if (back->type == AST_EXPRESSION_TYPE_UOP)
 			{
-				case ',':
-					// todo function arguments
-					break;
-				case '+':
-				case '-':
-				case '*':
-				case '/':
-				{
-					AST_BOP_Expression *bop_expr =
-					    new AST_BOP_Expression(
-						next_tok.value);
-					bop_expr->lhs = expr;
-					expr = bop_expr;
-				}
-					pop_token();
-					break;
-
-				default:
-					break;
 			}
 		}
 
-		expression_stack.push_back(expr);
+		last_expr = expr;
+		pop_token();
 	}
 	return nullptr;
 }
