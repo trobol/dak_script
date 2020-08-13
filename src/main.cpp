@@ -45,15 +45,15 @@ int main(int argc, char *argv[])
 
 	std::ofstream output("output.txt");
 
-	for (const Token &t : mod.tokens)
+	for (const Token &t : mod.tokens())
 	{
 		if (t.type == TOKEN_TYPE_IDENTIFIER)
 		{
-			output << "I_" << mod.identifiers[t.index] << ' ';
+			output << "I_" << mod.get_identifier(t) << ' ';
 		}
 		else if (t.type == TOKEN_TYPE_LITERAL)
 		{
-			Token_Literal &l = mod.literals[t.index];
+			Token_Literal l = mod.get_literal(t);
 
 			switch (l.type)
 			{

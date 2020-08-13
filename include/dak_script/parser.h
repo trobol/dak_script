@@ -70,10 +70,10 @@ private:
 
 	void parse_block();
 
-	Token &peek_token() { return m_token_module.tokens[m_index]; }
+	Token &peek_token() { return m_token_module.get_token(m_index); }
 	Token &peek_token(size_t i)
 	{
-		return m_token_module.tokens[m_index + i];
+		return m_token_module.get_token(m_index+i);
 	}
 	Token &pop_n_peek_token()
 	{

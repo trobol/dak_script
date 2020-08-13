@@ -15,7 +15,7 @@ dak_std::string token_to_string(Token t, Token_Module *m)
 	}
 	else if (t.type == TOKEN_TYPE_IDENTIFIER)
 	{
-		return m->identifiers[t.index];
+		return m->get_identifier(t);
 	}
 	else if (t.type == TOKEN_TYPE_LITERAL)
 	{

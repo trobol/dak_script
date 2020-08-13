@@ -163,6 +163,10 @@ public:
 		_dak_assert(i + m_begin >= m_end);
 		return m_begin[i];
 	}
+	const T&operator[](size_t i) const {
+		_dak_assert(i + m_begin >= m_end);
+		return m_begin[i];
+	}
 
 	size_t capacity() const noexcept
 	{
