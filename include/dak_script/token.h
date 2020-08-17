@@ -29,6 +29,8 @@ enum Token_Value : uint32_t
 
 	TOKEN_ASTERISK = '*',
 	TOKEN_AMPERSAND = '&',
+	TOKEN_PLUS = '+',
+	TOKEN_MINUS = '-',
 
 	TOKEN_COLON = ':',
 	TOKEN_EQUALS = '=',
@@ -42,6 +44,8 @@ enum Token_Value : uint32_t
 	TOKEN_EMPTY,
 	TOKEN_NUMBER,
 	TOKEN_STRING,
+
+	
 
 	TOKEN_PLUSEQUALS,
 	TOKEN_MINUSEQUALS,
@@ -58,6 +62,9 @@ enum Token_Value : uint32_t
 	TOKEN_KEYWORD_NULL,
 	TOKEN_KEYWORD_NULLPTR,
 
+	TOKEN_KEYWORD_TRUE,
+	TOKEN_KEYWORD_FALSE,
+	
 	TOKEN_ERROR,
 
 };

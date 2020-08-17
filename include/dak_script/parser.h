@@ -3,7 +3,6 @@
 
 #include "token_module.h"
 #include <dak_script/ast.h>
-#include <dak_script/reserves.h>
 #include <dak_std/vector.h>
 #include <string>
 #include <unordered_map>
