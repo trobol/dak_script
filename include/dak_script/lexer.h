@@ -27,6 +27,7 @@ private:
 
 	dak_std::vector<dak_std::string> m_identifiers;
 	dak_std::vector<Token_Literal> m_literals;
+	dak_std::vector<dak_std::string> m_symbol_table;
 
 	dak_std::vector<dak_std::string> m_string_literals;
 
