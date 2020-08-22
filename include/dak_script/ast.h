@@ -4,6 +4,7 @@
 #include <dak_std/string.h>
 #include <dak_std/vector.h>
 #include <unordered_map>
+#include "ast_type.h"
 
 namespace dak_script
 {
@@ -15,9 +16,9 @@ struct AST_Expression;
 struct AST_Variable
 {
 	bool is_type_inferred;
-	// Type *type;
 	AST_Declaration_Statement *declaration;
 	dak_std::string name;
+	AST_Type_Ref type;
 
 	AST_Variable(dak_std::string &n) : name{n} {}
 };

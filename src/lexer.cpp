@@ -5,6 +5,8 @@
 #include <dak_std/string.h>
 #include <iostream>
 
+#include <dak_script/symbol_table.h>
+
 namespace dak_script
 {
 

@@ -3,7 +3,7 @@
 namespace dak_script
 {
 Scope_Block::Scope_Block(Scope_Block *parent)
-    : m_parent{parent}, m_var_allocator(5 * sizeof(Variable)),
+    : m_parent{parent},
       m_func_allocator(5 * sizeof(Function))
 {
 }

@@ -1,7 +1,6 @@
 #ifndef _DAK_SCRIPT_AST_SCOPE_H
 #define _DAK_SCRIPT_AST_SCOPE_H
 #include "../ast.h"
-#include "variable.h"
 #include <dak_std/linear_allocator.h>
 #include <dak_std/vector.h>
 #include <string>
@@ -19,12 +18,10 @@ public:
 	Scope_Block *m_parent;
 	dak_std::vector<AST_Statement *> m_expressions;
 
-	std::unordered_map<const char *, Variable *> m_var_map;
-
-	dak_std::linear_allocator m_var_allocator;
+	std::unordered_map<dak_std::string, AST_Variable *> m_var_map;
 
 	// list of types
-	dak_std::vector<Type> m_types;
+	AST_Type_Map m_types;
 
 	// list of functions
 	std::unordered_map<const char *, Function *> m_func_map;
@@ -33,7 +30,7 @@ public:
 
 public:
 	Scope_Block(Scope_Block *parent);
-	Variable *find_variable(const char *name)
+	AST_Variable *find_variable(dak_std::string& name)
 	{
 		auto result_pair = m_var_map.find(name);
 		if (result_pair != m_var_map.end())
@@ -44,9 +41,9 @@ public:
 
 	Scope_Block *parent() { return m_parent; }
 
-	Variable *add_variable(const char *name)
+	AST_Variable *add_variable(dak_std::string& name)
 	{
-		Variable *v = m_var_allocator.allocate<Variable>();
+		AST_Variable *v = new AST_Variable(name);
 		m_var_map.insert({name, v});
 		return v;
 	}
@@ -57,7 +54,7 @@ public:
 class Function
 {
 	dak_std::string m_identifier;
-	dak_std::vector<Variable> m_parameters;
+	dak_std::vector<AST_Variable> m_parameters;
 	Scope_Block m_block;
 
 public:

@@ -27,6 +27,8 @@ private:
 
 	dak_std::vector<dak_std::string> m_identifiers;
 	dak_std::vector<Token_Literal> m_literals;
+
+	std::unordered_map<dak_std::string, uint32_t> m_symbol_map;
 	dak_std::vector<dak_std::string> m_symbol_table;
 
 	dak_std::vector<dak_std::string> m_string_literals;

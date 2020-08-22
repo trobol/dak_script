@@ -10,6 +10,7 @@ namespace dak_script
 {
 enum AST_Type_Kind
 {
+	TYPE_KIND_UNKNOWN,
 	TYPE_KIND_STRUCT,
 	TYPE_KIND_ENUM,
 	TYPE_KIND_ALIAS,
@@ -47,6 +48,7 @@ class AST_Type_Ref
 	};
 
 public:
+	AST_Type_Ref() : m_kind{TYPE_KIND_UNKNOWN}, mp_ptr{nullptr} {}
 	AST_Type_Ref(AST_Type_Kind kind, void *ptr)
 	    : m_kind{kind}, mp_ptr{ptr} {};
 	AST_Type_Struct_Data *get_struct()
