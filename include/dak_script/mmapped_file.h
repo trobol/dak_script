@@ -17,11 +17,11 @@ private:
 
 	mmapped_file(const mmapped_file &);
 
+	mmapped_file(file_descriptor &fd, size_t size, const char *data);
+
 public:
 	static mmapped_file map(file_descriptor &fd);
 	static mmapped_file map(file_descriptor &fd, size_t size);
-
-	mmapped_file(file_descriptor &fd, size_t size, const char *data);
 
 	size_t size() const { return m_size; }
 	const char *data() const { return m_data; }

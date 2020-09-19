@@ -26,5 +26,25 @@ bool is_directory(const string &path)
 	stat(path.data(), &sb);
 	return sb.st_mode & S_IFDIR;
 }
-
+/*
+// TODO make this less shit
+string get_filename(const string &path)
+{
+	const char *end = path.end();
+	const char *begin = path.begin();
+	for (unsigned i = path.size(); i > 0; i--)
+	{
+		const char c = path[i];
+		if (c == '.')
+		{
+			end = begin + i;
+		}
+		else if (c == '/')
+		{
+			return string(begin + i + 1, end);
+		}
+	}
+	return "";
+}
+*/
 } // namespace dak_std

@@ -1,6 +1,6 @@
 #ifndef _DAK_SCRIPT_FILE_HANDLE_H
 #define _DAK_SCRIPT_FILE_HANDLE_H
-#include <string>
+#include <dak_std/string.h>
 
 namespace dak_script
 {
@@ -27,9 +27,9 @@ public:
 
 	size_t size() const;
 
-	static file_descriptor open(const std::string &path, file_mode mode);
-	static file_descriptor open(std::string &&path, file_mode mode);
-	static file_descriptor open(const char *path, file_mode mode);
+	static file_descriptor open(const dak_std::string &path,
+				    file_mode mode);
+	static file_descriptor open(dak_std::string &&path, file_mode mode);
 
 	int id() const { return m_id; }
 };

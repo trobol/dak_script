@@ -1,16 +1,20 @@
 #include <chrono>
 #include <dak_script/lexer.h>
+#include <dak_script/llvm_ir/generator.h>
 #include <dak_script/mmapped_file.h>
 #include <dak_script/parser.h>
 #include <dak_script/token.h>
-#include <dak_std/filesystem.h>
+
 #include <fstream>
 #include <iostream>
 
+#include <dak_std/filesystem.h>
 #include <dak_std/linked_queue.h>
 #include <dak_std/vector.h>
 
 using namespace dak_script;
+
+void print_module(Parsed_Module *);
 
 int main(int argc, char *argv[])
 {
@@ -91,6 +95,35 @@ int main(int argc, char *argv[])
 
 	Parsed_Module *parsed_module = parser.parse();
 
+	print_module(parsed_module);
+
+	LLVM_IR_Generator generator;
+
+	LLVM_IR_Module *ir_module = generator.generate(parsed_module);
+
+	delete ir_module;
+	delete parsed_module;
+	dak_std::error err_mmf = file.unmap();
+
+	int err_fd = fd.close();
+
+	auto t_end = std::chrono::high_resolution_clock::now();
+	printf(
+	    "duration %fms \n",
+	    std::chrono::duration<double, std::milli>(t_end - t_start).count());
+	if (err_mmf != 0)
+	{
+		return err_mmf.value();
+	}
+	else
+	{
+		return err_fd;
+	}
+}
+
+void print_module(Parsed_Module *parsed_module)
+{
+
 	printf("Statements: %u\n",
 	       parsed_module->top_block->statements().size());
 	for (AST_Statement *s : parsed_module->top_block->statements())
@@ -107,6 +140,7 @@ int main(int argc, char *argv[])
 	printf("Functions:\n");
 	for (AST_Function *func : parsed_module->top_block->functions())
 	{
+
 		printf("	%s ( ", func->name);
 		for (AST_Variable *p : func->parameters)
 		{
@@ -119,22 +153,5 @@ int main(int argc, char *argv[])
 	for (AST_Type *type : parsed_module->top_block->types())
 	{
 		printf("	%s\n", type->name);
-	}
-
-	dak_std::error err_mmf = file.unmap();
-
-	int err_fd = fd.close();
-
-	auto t_end = std::chrono::high_resolution_clock::now();
-	printf(
-	    "duration %fms \n",
-	    std::chrono::duration<double, std::milli>(t_end - t_start).count());
-	if (err_mmf != 0)
-	{
-		return err_mmf.value();
-	}
-	else
-	{
-		return err_fd;
 	}
 }

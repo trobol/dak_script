@@ -7,24 +7,12 @@
 namespace dak_script
 {
 
-void Parser::syntax_error(Token_Pos &pos, const char *fmt, ...)
-{
-	char buffer[500];
-	sprintf(buffer, "Syntax error at %s:%i:%i, %s\n", m_filename,
-		pos.line_number, pos.character_number, fmt);
-	va_list argptr;
-	va_start(argptr, fmt);
-	vprintf(buffer, argptr);
-	va_end(argptr);
-}
-
-// AST_Type *Parser::find_type(dak_std::string &name) {}
-
 Parsed_Module *Parser::parse()
 {
-	m_parsed_module = new Parsed_Module();
+	Parsed_Module *parsed_module = new Parsed_Module();
 	AST_Statement_Block *top_block = new AST_Statement_Block();
-	m_parsed_module->top_block = top_block;
+	parsed_module->top_block = top_block;
+	parsed_module->path = m_filename;
 	m_current_block = top_block;
 	Token &tok = peek_token();
 
@@ -39,7 +27,20 @@ Parsed_Module *Parser::parse()
 		}
 	} while (!m_eof);
 
-	return m_parsed_module;
+	return parsed_module;
+}
+
+// AST_Type *Parser::find_type(dak_std::string &name) {}
+
+void Parser::syntax_error(Token_Pos &pos, const char *fmt, ...)
+{
+	char buffer[500];
+	sprintf(buffer, "Syntax error at %s:%i:%i, %s\n", m_filename,
+		pos.line_number, pos.character_number, fmt);
+	va_list argptr;
+	va_start(argptr, fmt);
+	vprintf(buffer, argptr);
+	va_end(argptr);
 }
 
 AST_Statement *Parser::parse_struct(AST_Type *type)
@@ -206,8 +207,8 @@ AST_Expression *Parser::parse_struct_construct_expr(dak_std::string &name)
 		Token tok = peek_token();
 		if (tok.type == TOKEN_TYPE_IDENTIFIER)
 		{
-			prop = dak_std::string(
-			    m_token_module.get_identifier(tok));
+			prop =
+			    dak_std::string(m_token_module.get_identifier(tok));
 		}
 		else
 		{
@@ -281,8 +282,7 @@ AST_Function *Parser::parse_func_dec()
 	if (tok != TOKEN_OPEN_PAREN)
 	{
 		// TODO SYNTAX ERROR
-		syntax_error(m_token_module.pos(m_index),
-			     "expected '(' got %s",
+		syntax_error(m_token_module.pos(m_index), "expected '(' got %s",
 			     token_to_string(tok, &m_token_module));
 	}
 	// parse parameters
@@ -360,8 +360,7 @@ AST_Function *Parser::parse_func_dec()
 	tok = peek_token();
 	if (tok.type == TOKEN_TYPE_IDENTIFIER)
 	{
-		dak_std::string &type_name =
-		    m_token_module.get_identifier(tok);
+		dak_std::string &type_name = m_token_module.get_identifier(tok);
 		AST_Type *type = m_current_block->find_type(type_name);
 		func->add_return(type);
 	}
@@ -443,7 +442,8 @@ AST_Expression *Parser::parse_next_expression()
 		AST_Expression *expr = nullptr;
 		if (tok.type == TOKEN_TYPE_LITERAL)
 		{
-			expr = new AST_Literal_Expression(m_token_module.get_literal(tok));
+			expr = new AST_Literal_Expression(
+			    m_token_module.get_literal(tok));
 		}
 		else if (tok.type == TOKEN_TYPE_TOKEN)
 		{
@@ -461,8 +461,9 @@ AST_Expression *Parser::parse_next_expression()
 					else
 						return last_expr;
 				case '(':
-	
-					expression_stack.push_back(new AST_Paren_Expression());
+
+					expression_stack.push_back(
+					    new AST_Paren_Expression());
 					break;
 				case ')':
 				{
@@ -477,10 +478,9 @@ AST_Expression *Parser::parse_next_expression()
 							    .back());
 
 						paren_expr->expr = last_expr;
-						    
+
 						expr = paren_expr;
 						expression_stack.pop_back();
-
 					}
 					else
 					{
@@ -498,7 +498,7 @@ AST_Expression *Parser::parse_next_expression()
 				case '-':
 				case '*':
 				case '/':
-				
+
 					if (last_expr == nullptr)
 					{
 						// it is a uop
@@ -514,7 +514,6 @@ AST_Expression *Parser::parse_next_expression()
 						    bop_expr);
 					}
 					break;
-				
 
 				default:
 					syntax_error(

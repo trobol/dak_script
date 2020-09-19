@@ -2,6 +2,7 @@
 #include <climits>
 #include <cstddef>
 #include <cstring>
+#include <dak_std/assert.h>
 #include <dak_std/string.h>
 
 namespace dak_std
@@ -70,7 +71,7 @@ void set_msb(unsigned char &byte, bool bit)
 
 string::string() noexcept : string{"", static_cast<std::size_t>(0)} {}
 
-string::string(char const *str, std::size_t size)
+string::string(const char *str, std::size_t size)
 {
 	if (size <= sso_capacity)
 	{
@@ -87,7 +88,29 @@ string::string(char const *str, std::size_t size)
 	}
 }
 
-string::string(char const *str) : string{str, strlen(str)} {}
+string::string(char c, std::size_t size)
+{
+	char *ptr;
+	if (size <= sso_capacity)
+	{
+		ptr = m_data.sso.string;
+		set_sso_size(size);
+	}
+	else
+	{
+		ptr = new char[size + 1];
+		m_data.non_sso.ptr = ptr;
+		set_non_sso_data(size, size);
+	}
+	char *end = ptr + size;
+	*end = 0;
+	for (; ptr < end; ptr++)
+	{
+		*ptr = c;
+	}
+}
+
+string::string(const char *str) : string{str, strlen(str)} {}
 
 string::string(const string &str)
 {
@@ -101,10 +124,10 @@ string::string(const string &str)
 	}
 }
 
-string::string(string &&string) noexcept
+string::string(string &&str) noexcept
 {
-	m_data = string.m_data;
-	string.set_moved_from();
+	m_data = str.m_data;
+	str.set_moved_from();
 }
 
 string &string::operator=(string const &other)
@@ -179,6 +202,48 @@ std::size_t string::sso_size() const noexcept
 	return sso_capacity - ((m_data.sso.size >> 2) & 63u);
 }
 
+std::size_t string::resize(std::size_t s)
+{
+	std::size_t old_size = size();
+
+	char *start;
+	char *end;
+
+	if (s <= sso_capacity)
+	{
+		if (!sso())
+		{
+			char *ptr = m_data.non_sso.ptr;
+			strncpy(m_data.sso.string, m_data.non_sso.ptr,
+				old_size);
+			delete ptr;
+		}
+		start = m_data.sso.string + old_size;
+		end = m_data.sso.string + s;
+		set_sso_size(s);
+	}
+	else
+	{
+		char *buffer = new char[s + 1];
+		start = buffer + old_size;
+		end = buffer + s;
+
+		strncpy(buffer, data(), old_size);
+
+		if (!sso())
+		{
+			delete m_data.non_sso.ptr;
+		}
+		m_data.non_sso.ptr = buffer;
+		set_non_sso_data(s, s);
+	}
+	*end = 0;
+	for (char *c = start; c < end; c++)
+	{
+		*c = ' ';
+	}
+}
+
 void string::set_non_sso_data(std::size_t size, std::size_t capacity)
 {
 	auto &size_hsb = most_sig_byte(size);
@@ -237,9 +302,48 @@ bool operator==(const string &lhs, const string &rhs) noexcept
 	return !std::strcmp(lhs.data(), rhs.data());
 }
 
+bool str_less(const char *lhs, const char *rhs)
+{
+	while (*lhs && *rhs && *lhs == *rhs)
+	{
+		++lhs;
+		++rhs;
+	}
+	return *lhs < *rhs;
+}
+
+bool operator<(const string &lhs, const string &rhs) noexcept
+{
+	return str_less(lhs.data(), rhs.data());
+}
+bool operator<(const char *lhs, const string &rhs) noexcept
+{
+	return str_less(lhs, rhs.data());
+}
+bool operator<(const string &lhs, const char *rhs) noexcept
+{
+	return str_less(lhs.data(), rhs);
+}
+
+bool operator>(const string &lhs, const string &rhs) noexcept;
+bool operator>(const char *lhs, const string &rhs) noexcept;
+bool operator>(const string &lhs, const char *rhs) noexcept;
+
 std::ostream &operator<<(std::ostream &stream, const string &string)
 {
 	return stream << string.data();
+}
+
+string to_string(unsigned int val)
+{
+	unsigned digits = 0;
+	unsigned num = val;
+	while (num)
+	{
+		num /= 10;
+		digits++;
+	}
+	string result();
 }
 
 } // namespace dak_std

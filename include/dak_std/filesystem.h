@@ -9,6 +9,8 @@ dak_std::string get_working_directory();
 
 bool is_directory(const dak_std::string &);
 
+// string get_filename(const string &);
+
 } // namespace dak_std
 
 #endif

@@ -1,6 +1,11 @@
 #ifndef _DAK_STD_STRING_H
 #define _DAK_STD_STRING_H
 
+// TODO
+
+// this is heavily based on https://github.com/elliotgoodrich/SSO-23
+// add the licence
+
 #include <ostream>
 
 namespace dak_std
@@ -29,9 +34,10 @@ public:
 
 	string() noexcept;
 
-	string(char const *string, std::size_t size);
+	string(const char *string, std::size_t size);
+	string(char c, std::size_t size);
 
-	string(char const *str);
+	string(const char *str);
 
 	string(const string &str);
 
@@ -48,6 +54,8 @@ public:
 	std::size_t size() const noexcept;
 
 	std::size_t capacity() const noexcept;
+
+	std::size_t resize(std::size_t);
 
 	friend void swap(string &lhs, string &rhs)
 	{
@@ -75,10 +83,16 @@ public:
 };
 
 bool operator==(const string &lhs, const char *rhs) noexcept;
-
 bool operator==(const char *lhs, const string &rhs) noexcept;
-
 bool operator==(const string &lhs, const string &rhs) noexcept;
+
+bool operator<(const string &lhs, const string &rhs) noexcept;
+bool operator<(const char *lhs, const string &rhs) noexcept;
+bool operator<(const string &lhs, const char *rhs) noexcept;
+
+bool operator>(const string &lhs, const string &rhs) noexcept;
+bool operator>(const char *lhs, const string &rhs) noexcept;
+bool operator>(const string &lhs, const char *rhs) noexcept;
 
 std::ostream &operator<<(std::ostream &stream, const string &string);
 
@@ -104,6 +118,8 @@ struct hash<dak_std::string>
 		return h;
 	}
 };
+
+string to_string(unsigned int val);
 } // namespace std
 
 #endif

@@ -14,7 +14,7 @@ struct Parsed_Module
 {
 	// unused for now
 	// dak_std::vector<Scope_Block *> imports;
-
+	dak_std::string path;
 	// exports
 	AST_Statement_Block *top_block;
 
@@ -28,8 +28,6 @@ class Parser
 	Token_Module &m_token_module;
 
 	AST_Base_Block *m_current_block;
-
-	Parsed_Module *m_parsed_module;
 
 	bool m_eof;
 
@@ -72,7 +70,7 @@ private:
 	Token &peek_token() { return m_token_module.get_token(m_index); }
 	Token &peek_token(size_t i)
 	{
-		return m_token_module.get_token(m_index+i);
+		return m_token_module.get_token(m_index + i);
 	}
 	Token &pop_n_peek_token()
 	{

@@ -1,13 +1,26 @@
 #ifndef _DAK_SCRIPT_AST_AST_H
 #define _DAK_SCRIPT_AST_AST_H
+#include "ast_type.h"
 #include <dak_script/ast_expression.h>
 #include <dak_std/string.h>
 #include <dak_std/vector.h>
 #include <unordered_map>
-#include "ast_type.h"
 
 namespace dak_script
 {
+
+enum AST_Statement_Type
+{
+	AST_STATEMENT_TYPE_UNKNOWN,
+	AST_STATEMENT_TYPE_STATEMENT,
+	AST_STATEMENT_TYPE_STATEMENT_BLOCK,
+	AST_STATEMENT_TYPE_FUNCTION_BLOCK,
+	AST_STATEMENT_TYPE_STRUCT_BLOCK,
+	AST_STATEMENT_TYPE_DECLARATION,
+	AST_STATEMENT_TYPE_IF_ELSE,
+	AST_STATEMENT_TYPE_SWITCH,
+	AST_STATEMENT_TYPE_ASSIGN,
+};
 
 struct AST_Declaration_Statement;
 
@@ -35,8 +48,10 @@ struct AST_Type
 // top level
 struct AST_Statement
 {
+	const AST_Statement_Type m_statement_type;
+	AST_Statement(const AST_Statement_Type t) : m_statement_type{t} {};
+	AST_Statement() : m_statement_type{AST_STATEMENT_TYPE_UNKNOWN} {};
 	virtual ~AST_Statement() {}
-	// virtual void codegen() = 0;
 	virtual void print(unsigned indent = 0)
 	{
 		const char buffer[50] = {};
@@ -56,6 +71,8 @@ struct AST_Function;
 
 struct AST_Base_Block : public AST_Statement
 {
+
+	AST_Base_Block(const AST_Statement_Type t) : AST_Statement{t} {}
 	AST_Base_Block *parent;
 
 	virtual AST_Variable *find_variable(dak_std::string &name) = 0;
@@ -76,7 +93,10 @@ private:
 	AST_Type *m_type;
 
 public:
-	AST_Struct_Block(AST_Type *type) : m_type{type} {}
+	AST_Struct_Block(AST_Type *type)
+	    : AST_Base_Block{AST_STATEMENT_TYPE_STRUCT_BLOCK}, m_type{type}
+	{
+	}
 	AST_Variable *find_variable(dak_std::string &name);
 
 	AST_Variable *add_variable(dak_std::string &name);
@@ -105,6 +125,10 @@ private:
 	std::unordered_map<dak_std::string, AST_Type *> m_type_map;
 
 public:
+	AST_Statement_Block()
+	    : AST_Base_Block{AST_STATEMENT_TYPE_STATEMENT_BLOCK}
+	{
+	}
 	AST_Variable *find_variable(dak_std::string &name);
 	AST_Variable *add_variable(dak_std::string &name);
 
@@ -188,7 +212,7 @@ public:
 struct AST_Switch_Statement : public AST_Statement
 {
 public:
-	AST_Switch_Statement() {}
+	AST_Switch_Statement() : AST_Statement{AST_STATEMENT_TYPE_SWITCH} {}
 };
 
 struct AST_Declaration_Statement : public AST_Statement
@@ -198,7 +222,8 @@ struct AST_Declaration_Statement : public AST_Statement
 
 public:
 	AST_Declaration_Statement(AST_Variable *variable, AST_Expression *value)
-	    : variable{variable}, value{value}
+	    : AST_Statement{AST_STATEMENT_TYPE_DECLARATION}, variable{variable},
+	      value{value}
 	{
 	}
 	~AST_Declaration_Statement() { delete value; }
@@ -217,7 +242,8 @@ struct AST_Assign_Statement : public AST_Statement
 
 public:
 	AST_Assign_Statement(AST_Variable *variable, AST_Expression *value)
-	    : variable{variable}, value{value}
+	    : AST_Statement{AST_STATEMENT_TYPE_ASSIGN}, variable{variable},
+	      value{value}
 	{
 	}
 	~AST_Assign_Statement() { delete value; }
