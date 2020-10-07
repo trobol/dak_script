@@ -20,6 +20,25 @@ private:
 	T *m_end;
 	T *m_capacity;
 
+	void find_or_make_space()
+	{
+		if (m_end == m_capacity)
+		{
+			size_t capacity = m_capacity - m_begin;
+			size_t new_capacity;
+			if (capacity == 0)
+			{
+				new_capacity =
+				    std::max(64 / sizeof(T), size_t(1));
+			}
+			else
+			{
+				new_capacity = capacity * 2;
+			}
+			reserve(new_capacity);
+		}
+	}
+
 public:
 	vector() : m_begin{nullptr}, m_end{nullptr}, m_capacity{nullptr} {}
 	~vector()
@@ -40,7 +59,6 @@ public:
 		v.m_end = nullptr;
 		v.m_capacity = nullptr;
 	}
-
 	vector(std::initializer_list<T> list)
 	{
 		T *begin = list.begin();
@@ -67,44 +85,24 @@ public:
 		}
 	}
 
+	template <class... Args>
+	void emplace_back(Args &&... args)
+	{
+		find_or_make_space();
+		new (m_end) T(args...);
+		++m_end;
+	}
+
 	void push_back(const T &value)
 	{
-		if (m_end == m_capacity)
-		{
-			size_t capacity = m_capacity - m_begin;
-			size_t new_capacity;
-			if (capacity == 0)
-			{
-				new_capacity =
-				    std::max(64 / sizeof(T), size_t(1));
-			}
-			else
-			{
-				new_capacity = capacity * 2;
-			}
-			reserve(new_capacity);
-		}
-
+		find_or_make_space();
 		new (m_end) T(value);
 		++m_end;
 	}
+
 	void push_back(T &&value)
 	{
-		if (m_end == m_capacity)
-		{
-			size_t capacity = m_capacity - m_begin;
-			size_t new_capacity;
-			if (capacity == 0)
-			{
-				new_capacity =
-				    std::max(64 / sizeof(T), size_t(1));
-			}
-			else
-			{
-				new_capacity = capacity * 2;
-			}
-			reserve(new_capacity);
-		}
+		find_or_make_space();
 
 		new (m_end) T(value);
 		++m_end;
@@ -129,7 +127,8 @@ public:
 				{
 					*dst = src;
 				}
-				else if (std::is_move_constructible_v<T>)
+				else if constexpr (std::is_move_constructible<
+						       T>::value)
 				{
 					new (dst) T(std::move(*src));
 				}
@@ -163,7 +162,8 @@ public:
 		_dak_assert(i + m_begin >= m_end);
 		return m_begin[i];
 	}
-	const T&operator[](size_t i) const {
+	const T &operator[](size_t i) const
+	{
 		_dak_assert(i + m_begin >= m_end);
 		return m_begin[i];
 	}

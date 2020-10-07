@@ -1,3 +1,5 @@
+#include <dak_script/llvm_ir/arg.h>
+#include <dak_script/llvm_ir/context.h>
 #include <dak_script/llvm_ir/generator.h>
 #include <dak_script/parser.h>
 #include <dak_std/filesystem.h>
@@ -6,7 +8,9 @@ namespace dak_script
 {
 LLVM_IR_Module *LLVM_IR_Generator::generate(Parsed_Module *parsed_module)
 {
-	LLVM_IR_Module *ir_module = new LLVM_IR_Module();
+	m_ir_module = new LLVM_IR_Module();
+
+	/*
 	// dak_std::string filename = get_filename(parsed_module->path);
 	m_stream.open("output.ll");
 
@@ -28,10 +32,33 @@ LLVM_IR_Module *LLVM_IR_Generator::generate(Parsed_Module *parsed_module)
 	}
 	m_stream << "}";
 	m_stream.close();
-	return ir_module;
+	*/
+
+	// process_block(parsed_module->top_block);
+
+	AST_Statement_Block *block = parsed_module->top_block;
+	m_current_context = new LLVM_IR_Context();
+
+	for (AST_Statement *s : block->statements())
+	{
+		proccess_statement(s);
+	}
+
+	return m_ir_module;
 }
 
-void LLVM_IR_Generator::proccess_statement(AST_Statement *statement)
+void LLVM_IR_Generator::process_block(AST_Statement_Block *block)
+{
+	m_current_context = new LLVM_IR_Context();
+	for (AST_Function *f : block->functions())
+	{
+		process_block(f);
+	}
+
+	m_ir_module->m_functions.push_back(context);
+}
+
+unsigned int LLVM_IR_Generator::proccess_statement(AST_Statement *statement)
 {
 	switch (statement->m_statement_type)
 	{
@@ -47,20 +74,51 @@ void LLVM_IR_Generator::proccess_statement(AST_Statement *statement)
 	}
 }
 
-void LLVM_IR_Generator::proccess_declaration(AST_Statement *statement)
+unsigned int LLVM_IR_Generator::proccess_declaration(AST_Statement *statement)
 {
 	AST_Declaration_Statement *decl_statement =
 	    dynamic_cast<AST_Declaration_Statement *>(statement);
 	if (decl_statement->value != nullptr)
 	{
 		dak_std::string name = decl_statement->variable->name;
-		proccess_expression(decl_statement->value, name);
+		unsigned int value =
+		    proccess_expression(decl_statement->value, name);
 	}
+	LLVM_IR_Line *line = 
+
+	return m_current_context->add_line();
 }
 
-void LLVM_IR_Generator::proccess_expression(AST_Expression *expr,
-					    dak_std::string result)
+unsigned int flatten_expression(dak_std::vector<AST_Expression *> &list,
+				AST_Expression *expr)
 {
+	switch (expr->type)
+	{
+		case AST_EXPRESSION_TYPE_BOP:
+		{
+			AST_BOP_Expression *bop_expr =
+			    static_cast<AST_BOP_Expression *>(expr);
+			flatten_expression(list, bop_expr->lhs);
+			flatten_expression(list, bop_expr->rhs);
+			break;
+		}
+		case AST_EXPRESSION_TYPE_UOP:
+		{
+			AST_UOP_Expression *uop_expr =
+			    static_cast<AST_UOP_Expression *>(expr);
+			flatten_expression(list, uop_expr->expr);
+			break;
+		}
+		default:
+			list.push_back(expr);
+			break;
+	}
+}
+unsigned int LLVM_IR_Generator::proccess_expression(AST_Expression *expr,
+						    dak_std::string result)
+{
+	dak_std::vector<AST_Expression *> list;
+
 	// TODO add the rest of the expressions
 	switch (expr->type)
 	{
@@ -72,10 +130,29 @@ void LLVM_IR_Generator::proccess_expression(AST_Expression *expr,
 	}
 }
 
-void LLVM_IR_Generator::proccess_bop_expression(AST_Expression *expr,
-						dak_std::string result)
+LLVM_IR_Value LLVM_IR_Generator::proccess_bop_expression(AST_Expression *expr,
+							 dak_std::string result)
 {
-	AST_BOP_Expression *bop_expr = dynamic_cast<AST_BOP_Expression *>(expr);
+	AST_BOP_Expression *bop_expr = static_cast<AST_BOP_Expression *>(expr);
+
+	LLVM_IR_Value rhs = proccess_expression(bop_expr->rhs);
+	LLVM_IR_Value lhs = proccess_expression(bop_expr->lhs);
+
+	LLVM_IR_Instruction instr;
+
+	// todo this doesnt support unsigned integers
+	// todo support floats
+	bool is_integer = true;
+	if (is_integer)
+	{
+		instr = LLVM_IR_ADD + bop_expr->bop;
+	}
+	else
+	{
+		instr = LLVM_IR_FADD + bop_expr->bop;
+	}
+
+	m_current_contex->add_line(instr, {rhs, lhs})
 }
 // void LLVM_IR_Generator::process_function(AST_Function *func) {}
 

@@ -14,9 +14,11 @@ enum AST_Type_Kind
 	TYPE_KIND_STRUCT,
 	TYPE_KIND_ENUM,
 	TYPE_KIND_ALIAS,
+
 	TYPE_KIND_U8,
 	TYPE_KIND_U16,
 	TYPE_KIND_U32,
+	TYPE_KIND_U64,
 	TYPE_KIND_I8,
 	TYPE_KIND_I16,
 	TYPE_KIND_I32,
@@ -39,13 +41,13 @@ class AST_Type_Map;
 // which should already be in cache
 class AST_Type_Ref
 {
-	AST_Type_Kind m_kind;
 	union {
 		AST_Type_Struct_Data *mp_struct;
 		AST_Type_Enum_Data *mp_enum;
 		AST_Type_Alias_Data *mp_alias;
 		void *mp_ptr;
 	};
+	AST_Type_Kind m_kind : 4;
 
 public:
 	AST_Type_Ref() : m_kind{TYPE_KIND_UNKNOWN}, mp_ptr{nullptr} {}

@@ -1,22 +1,17 @@
 #ifndef _DAK_SCRIPT_LLVM_IR_CONTEXT_H
 #define _DAK_SCRIPT_LLVM_IR_CONTEXT_H
+#include "line.h"
 
 namespace dak_script
 {
 class LLVM_IR_Module;
 class LLVM_IR_Context
 {
-	LLVM_IR_Module *m_module;
-	unsigned m_tmp_index;
+	dak_std::vector<LLVM_IR_Line *> m_lines;
 
 public:
-	LLVM_IR_Context(LLVM_IR_Module *module) : m_module{module} {}
-	unsigned capture_tmp()
-	{
-		unsigned i = m_tmp_index;
-		++m_tmp_index;
-		return i;
-	}
+	LLVM_IR_Context() = default;
+	unsigned int add_line(LLVM_IR_Line *line) { m_lines.push_back(line); };
 };
 } // namespace dak_script
 #endif

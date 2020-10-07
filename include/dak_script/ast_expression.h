@@ -58,7 +58,8 @@ struct AST_Paren_Expression : public AST_Expression
 struct AST_Literal_Expression : public AST_Expression
 {
 	Token_Literal literal;
-	AST_Literal_Expression(Token_Literal l) : AST_Expression(AST_EXPRESSION_TYPE_LITERAL), literal{l}
+	AST_Literal_Expression(Token_Literal l)
+	    : AST_Expression(AST_EXPRESSION_TYPE_LITERAL), literal{l}
 	{
 	}
 };
@@ -72,8 +73,8 @@ enum AST_BOPERATOR
 {
 	AST_BOP_ADD,
 	AST_BOP_SUB,
-	AST_BOP_DIV,
-	AST_BOP_MULT
+	AST_BOP_MULT,
+	AST_BOP_DIV
 };
 struct AST_BOP_Expression : public AST_Expression
 {
