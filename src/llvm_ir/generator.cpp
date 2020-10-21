@@ -74,17 +74,23 @@ unsigned int LLVM_IR_Generator::proccess_statement(AST_Statement *statement)
 	}
 }
 
-unsigned int LLVM_IR_Generator::proccess_declaration(AST_Statement *statement)
+LLVM_IR_Value LLVM_IR_Generator::proccess_declaration(AST_Statement *statement)
 {
 	AST_Declaration_Statement *decl_statement =
 	    dynamic_cast<AST_Declaration_Statement *>(statement);
 	if (decl_statement->value != nullptr)
 	{
 		dak_std::string name = decl_statement->variable->name;
-		unsigned int value =
+		LLVM_IR_Value value =
 		    proccess_expression(decl_statement->value, name);
 	}
-	LLVM_IR_Line *line = 
+
+	LLVM_IR_Line *alloc_line = LLVM_IR_Line_Alloc(LLVM_IR_Type::i32, 1, 4)
+	    LLVM_IR_Line *store_line = LLVM_IR_Line_
+
+		LLVM_IR_Value alloc = m_current_context->append_line();
+
+	LLVM_IR_Line *line = LLVM_IR_Line_BOP();
 
 	return m_current_context->add_line();
 }

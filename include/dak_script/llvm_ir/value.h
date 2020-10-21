@@ -16,19 +16,19 @@ with: 5 non-number
 	  6 i1 i8 i16 i32 i64 i128
 
 */
-enum LLVM_IR_Arg_Type
+enum LLVM_IR_Value_Type
 {
-	LLVM_IR_ARG_TYPE_VOID,
+	LLVM_IR_TYPE_VOID,
 
-	LLVM_IR_ARG_TYPE_FLOAT,
-	LLVM_IR_ARG_TYPE_INT,
+	LLVM_IR_TYPE_FLOAT,
+	LLVM_IR_TYPE_INT,
 
-	LLVM_IR_ARG_TYPE_LABEL,
-	LLVM_IR_ARG_TYPE_POINTER,
+	LLVM_IR_TYPE_LABEL,
+	LLVM_IR_TYPE_POINTER,
 
-	LLVM_IR_ARG_TYPE_TYPE,
+	LLVM_IR_TYPE_TYPE,
 
-	LLVM_IR_ARG_TYPE_REG_REF,
+	LLVM_IR_TYPE_REFERENCE,
 
 	/*
 	unsure about these
@@ -45,16 +45,27 @@ enum LLVM_IR_Arg_Type
 class LLVM_IR_Type
 {
 private:
-	LLVM_IR_Arg_Type m_type : 3;
+	LLVM_IR_Value_Type m_type : 3;
 	unsigned int m_size : 4;
-	bool m_is_unsigned : 1;
+	bool m_signed : 1;
 
 public:
-	LLVM_IR_Type(LLVM_IR_Arg_Type type, bool un = false)
-	    : m_type{type}, m_is_unsigned{un}
+	LLVM_IR_Type(LLVM_IR_Value_Type type, unsigned int size = 0,
+		     bool is_signed = true)
+	    : m_type{type}, m_size{size}, m_signed{is_signed}
 	{
 	}
-	bool is_unsigned() { return m_is_unsigned; }
+	bool is_signed() { return m_signed; }
+
+	static const LLVM_IR_Type reference;
+
+	static const LLVM_IR_Type i8;
+	static const LLVM_IR_Type i16;
+	static const LLVM_IR_Type i32;
+
+	static const LLVM_IR_Type u8;
+	static const LLVM_IR_Type u16;
+	static const LLVM_IR_Type u32;
 };
 
 class LLVM_IR_Value
@@ -74,20 +85,28 @@ private:
 		} arg_reg;
 	} m_data;
 
+	LLVM_IR_Value(LLVM_IR_Type type) : m_type{type} {}
+
 public:
 	LLVM_IR_Value(double f, unsigned int size)
-	    : m_type{LLVM_IR_ARG_TYPE_FLOAT}, m_data{.arg_float = f}
+	    : m_type{LLVM_IR_TYPE_FLOAT}, m_data{.arg_float = f}
 	{
 	}
 
 	LLVM_IR_Value(unsigned long long int i, unsigned int size)
-	    : m_type{LLVM_IR_ARG_TYPE_INT}, m_data{.arg_int = i}
+	    : m_type{LLVM_IR_TYPE_INT}, m_data{.arg_int = i}
 	{
 	}
 
 	LLVM_IR_Value(const LLVM_IR_Value &a)
 	    : m_type{a.m_type}, m_data{a.m_data}
 	{
+	}
+
+	static LLVM_IR_Value create_ref(size_t line)
+	{
+		LLVM_IR_Value val(LLVM_IR_Type);
+		val.m_type =
 	}
 
 	const LLVM_IR_Type type() { return m_type; }

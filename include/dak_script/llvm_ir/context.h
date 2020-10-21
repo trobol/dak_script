@@ -11,7 +11,12 @@ class LLVM_IR_Context
 
 public:
 	LLVM_IR_Context() = default;
-	unsigned int add_line(LLVM_IR_Line *line) { m_lines.push_back(line); };
+	LLVM_IR_Value append_line(LLVM_IR_Line *line)
+	{
+		size_t end = m_lines.size();
+		m_lines.push_back(line);
+		return LLVM_IR
+	}
 };
 } // namespace dak_script
 #endif

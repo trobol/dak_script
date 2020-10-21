@@ -11,12 +11,13 @@ first 3 bits are type mask
 000 - unary
 001 - binary
 
-010 -
-011 -
-100 -
+010 - allocation
+011 - load/store
+100 - terminator
 101 -
 110 -
 111 -
+
 */
 enum LLVM_IR_Instruction_Type
 {

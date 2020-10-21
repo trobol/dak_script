@@ -10,7 +10,7 @@ class LLVM_IR_Builder
 private:
 	// settings
 public:
-	LLVM_IR_Arg make_int();
+	LLVM_IR_Value make_int();
 	LLVM_IR_Arg make_type();
 	LLVM_IR_Arg make_float();
 	LLVM_IR_Arg make_reg_ref();
