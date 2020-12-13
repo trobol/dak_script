@@ -1,10 +1,11 @@
-#include <chrono>
 #include <dak_script/lexer.h>
 #include <dak_script/llvm_ir/generator.h>
+#include <dak_script/llvm_ir/serializer.h>
 #include <dak_script/mmapped_file.h>
 #include <dak_script/parser.h>
 #include <dak_script/token.h>
 
+#include <chrono>
 #include <fstream>
 #include <iostream>
 
@@ -100,6 +101,12 @@ int main(int argc, char *argv[])
 	LLVM_IR_Generator generator;
 
 	LLVM_IR_Module *ir_module = generator.generate(parsed_module);
+
+	// will hold settings for serialization
+	// how to deal with metadata etc
+	LLVM_IR_Serializer serializer;
+
+	serializer.serialize(ir_module);
 
 	delete ir_module;
 	delete parsed_module;

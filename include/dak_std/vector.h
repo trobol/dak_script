@@ -59,6 +59,7 @@ public:
 		v.m_end = nullptr;
 		v.m_capacity = nullptr;
 	}
+
 	vector(std::initializer_list<T> list)
 	{
 		T *begin = list.begin();
@@ -113,6 +114,7 @@ public:
 		T *new_begin;
 		if constexpr (std::is_trivially_copyable_v<T>)
 		{
+			// TODO make sure this doesnt break alignment
 			new_begin = (T *)std::realloc((void *)m_begin,
 						      size * sizeof(T));
 			_dak_assert(new_begin);

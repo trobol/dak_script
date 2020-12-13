@@ -79,15 +79,13 @@ private:
 		{
 			// TODO figure this out
 		} arg_label;
-		struct Reg_Ref
-		{
-			unsigned int index;
-		} arg_reg;
+		unsigned int line_ref;
 	} m_data;
 
 	LLVM_IR_Value(LLVM_IR_Type type) : m_type{type} {}
 
 public:
+	LLVM_IR_Value(const LLVM_IR_Value &) = default;
 	LLVM_IR_Value(double f, unsigned int size)
 	    : m_type{LLVM_IR_TYPE_FLOAT}, m_data{.arg_float = f}
 	{
@@ -98,15 +96,11 @@ public:
 	{
 	}
 
-	LLVM_IR_Value(const LLVM_IR_Value &a)
-	    : m_type{a.m_type}, m_data{a.m_data}
+	static LLVM_IR_Value create_ref(unsigned int line)
 	{
-	}
-
-	static LLVM_IR_Value create_ref(size_t line)
-	{
-		LLVM_IR_Value val(LLVM_IR_Type);
-		val.m_type =
+		LLVM_IR_Value val(LLVM_IR_Type::reference);
+		val.m_data.line_ref = line;
+		return val;
 	}
 
 	const LLVM_IR_Type type() { return m_type; }

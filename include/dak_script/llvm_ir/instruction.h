@@ -23,7 +23,6 @@ enum LLVM_IR_Instruction_Type
 {
 	LLVM_IR_INSTRUCTION_TYPE_UOP = 0b00000000,
 	LLVM_IR_INSTRUCTION_TYPE_BOP = 0b00100000,
-
 };
 
 enum LLVM_IR_Instruction

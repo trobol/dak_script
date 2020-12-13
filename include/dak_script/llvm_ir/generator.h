@@ -3,6 +3,7 @@
 
 #include "instruction.h"
 #include "module.h"
+#include "value.h"
 #include <dak_std/string.h>
 #include <dak_std/vector.h>
 #include <fstream>
@@ -38,11 +39,9 @@ private:
 
 	LLVM_IR_Value proccess_declaration(AST_Statement *statement);
 
-	LLVM_IR_Value proccess_expression(AST_Expression *expr,
-					  dak_std::string result);
+	LLVM_IR_Value proccess_expression(AST_Expression *expr);
 
-	LLVM_IR_Value proccess_bop_expression(AST_Expression *expr,
-					      dak_std::string result);
+	LLVM_IR_Value proccess_bop_expression(AST_Expression *expr);
 
 	// void process_function(AST_Function *func);
 

@@ -1,6 +1,6 @@
-#include <dak_script/llvm_ir/arg.h>
 #include <dak_script/llvm_ir/context.h>
 #include <dak_script/llvm_ir/generator.h>
+#include <dak_script/llvm_ir/value.h>
 #include <dak_script/parser.h>
 #include <dak_std/filesystem.h>
 
@@ -44,6 +44,8 @@ LLVM_IR_Module *LLVM_IR_Generator::generate(Parsed_Module *parsed_module)
 		proccess_statement(s);
 	}
 
+	m_ir_module->m_functions.push_back(m_current_context);
+
 	return m_ir_module;
 }
 
@@ -55,16 +57,15 @@ void LLVM_IR_Generator::process_block(AST_Statement_Block *block)
 		process_block(f);
 	}
 
-	m_ir_module->m_functions.push_back(context);
+	m_ir_module->m_functions.push_back(m_current_context);
 }
 
-unsigned int LLVM_IR_Generator::proccess_statement(AST_Statement *statement)
+LLVM_IR_Value LLVM_IR_Generator::proccess_statement(AST_Statement *statement)
 {
 	switch (statement->m_statement_type)
 	{
 		case AST_STATEMENT_TYPE_DECLARATION:
-			proccess_declaration(statement);
-			break;
+			return proccess_declaration(statement);
 		case AST_STATEMENT_TYPE_ASSIGN:
 
 			break;
@@ -77,23 +78,21 @@ unsigned int LLVM_IR_Generator::proccess_statement(AST_Statement *statement)
 LLVM_IR_Value LLVM_IR_Generator::proccess_declaration(AST_Statement *statement)
 {
 	AST_Declaration_Statement *decl_statement =
-	    dynamic_cast<AST_Declaration_Statement *>(statement);
+	    static_cast<AST_Declaration_Statement *>(statement);
+
+	LLVM_IR_Value alloc = m_current_context->append_line(
+	    LLVM_IR_Line_Alloc(LLVM_IR_Type::i32, 1, 4));
+	LLVM_IR_Value store =
+	    m_current_context->append_line(LLVM_IR_Line_Store());
+
 	if (decl_statement->value != nullptr)
 	{
-		dak_std::string name = decl_statement->variable->name;
 		LLVM_IR_Value value =
-		    proccess_expression(decl_statement->value, name);
+		    proccess_expression(decl_statement->value);
 	}
 
-	LLVM_IR_Line *alloc_line = LLVM_IR_Line_Alloc(LLVM_IR_Type::i32, 1, 4)
-	    LLVM_IR_Line *store_line = LLVM_IR_Line_
-
-		LLVM_IR_Value alloc = m_current_context->append_line();
-
-	LLVM_IR_Line *line = LLVM_IR_Line_BOP();
-
-	return m_current_context->add_line();
-}
+	return alloc;
+} // namespace dak_script
 
 unsigned int flatten_expression(dak_std::vector<AST_Expression *> &list,
 				AST_Expression *expr)
@@ -120,8 +119,7 @@ unsigned int flatten_expression(dak_std::vector<AST_Expression *> &list,
 			break;
 	}
 }
-unsigned int LLVM_IR_Generator::proccess_expression(AST_Expression *expr,
-						    dak_std::string result)
+LLVM_IR_Value LLVM_IR_Generator::proccess_expression(AST_Expression *expr)
 {
 	dak_std::vector<AST_Expression *> list;
 
@@ -129,36 +127,37 @@ unsigned int LLVM_IR_Generator::proccess_expression(AST_Expression *expr,
 	switch (expr->type)
 	{
 		case AST_EXPRESSION_TYPE_BOP:
-			proccess_bop_expression(expr, result);
+			proccess_bop_expression(expr);
 			break;
 		default:
 			break;
 	}
 }
 
-LLVM_IR_Value LLVM_IR_Generator::proccess_bop_expression(AST_Expression *expr,
-							 dak_std::string result)
+LLVM_IR_Value LLVM_IR_Generator::proccess_bop_expression(AST_Expression *expr)
 {
 	AST_BOP_Expression *bop_expr = static_cast<AST_BOP_Expression *>(expr);
 
 	LLVM_IR_Value rhs = proccess_expression(bop_expr->rhs);
 	LLVM_IR_Value lhs = proccess_expression(bop_expr->lhs);
 
-	LLVM_IR_Instruction instr;
+	LLVM_IR_Line_BOP_Instr instr;
 
-	// todo this doesnt support unsigned integers
-	// todo support floats
+	// TODO this doesnt support unsigned integers
+	// TODO support floats
 	bool is_integer = true;
 	if (is_integer)
 	{
-		instr = LLVM_IR_ADD + bop_expr->bop;
+		instr = static_cast<LLVM_IR_Line_BOP_Instr>(
+		    LLVM_IR_LINE_BOP_INSTR_ADD + bop_expr->bop);
 	}
 	else
 	{
-		instr = LLVM_IR_FADD + bop_expr->bop;
+		instr = static_cast<LLVM_IR_Line_BOP_Instr>(
+		    LLVM_IR_LINE_BOP_INSTR_FADD + bop_expr->bop);
 	}
 
-	m_current_contex->add_line(instr, {rhs, lhs})
+	m_current_context->append_line(LLVM_IR_Line_BOP(instr, rhs, lhs));
 }
 // void LLVM_IR_Generator::process_function(AST_Function *func) {}
 

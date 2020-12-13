@@ -5,7 +5,7 @@ TOKEN_KEYWORD_FUNC I_test_math ( I_val : I_f32 ) I_f32 {
 
 
 
-I_val3 : = 0 UNKNOWN_TOKEN ( 5 ) UNKNOWN_TOKEN ( 3 - 6 ) * ( ( 4 / 0 UNKNOWN_TOKEN 2 ) - 5 ) UNKNOWN_TOKEN ( 3 UNKNOWN_TOKEN ( 5 * 8 ) ) 
+I_val3 : = 0 + ( 5 ) + ( 3 - 6 ) * ( ( 4 / 0 + 2 ) - 5 ) + ( 3 + ( 5 * 8 ) ) 
 
 
 

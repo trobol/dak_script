@@ -85,16 +85,20 @@ const char *token_value_to_name(Token_Value t)
 			return ")";
 		case TOKEN_COMMA:
 			return ",";
-		case '-':
-			return "-";
-		case TOKEN_ASTERISK:
-			return "*";
 		case TOKEN_COLON:
 			return ":";
 		case TOKEN_EQUALS:
 			return "=";
-		case TOKEN_SLASH:
+
+		case '-':
+			return "-";
+		case '+':
+			return "+";
+		case '/':
 			return "/";
+		case '*':
+			return "*";
+
 		case TOKEN_AMPERSAND:
 			return "&";
 		case TOKEN_BACKSLASH:
