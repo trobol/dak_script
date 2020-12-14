@@ -114,7 +114,7 @@ public:
 		T *new_begin;
 		if constexpr (std::is_trivially_copyable_v<T>)
 		{
-			// TODO make sure this doesnt break alignment
+			// TODO make sure this doesn't break alignment
 			new_begin = (T *)std::realloc((void *)m_begin,
 						      size * sizeof(T));
 			_dak_assert(new_begin);
@@ -161,12 +161,12 @@ public:
 	}
 	T &operator[](size_t i)
 	{
-		_dak_assert(i + m_begin >= m_end);
+		_dak_assert(i + m_begin < m_end);
 		return m_begin[i];
 	}
 	const T &operator[](size_t i) const
 	{
-		_dak_assert(i + m_begin >= m_end);
+		_dak_assert(i + m_begin < m_end);
 		return m_begin[i];
 	}
 

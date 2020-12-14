@@ -30,7 +30,7 @@ public:
 
 public:
 	Scope_Block(Scope_Block *parent);
-	AST_Variable *find_variable(dak_std::string& name)
+	AST_Variable *find_variable(dak_std::string &name)
 	{
 		auto result_pair = m_var_map.find(name);
 		if (result_pair != m_var_map.end())
@@ -41,9 +41,9 @@ public:
 
 	Scope_Block *parent() { return m_parent; }
 
-	AST_Variable *add_variable(dak_std::string& name)
+	AST_Variable *add_variable(dak_std::string &name, AST_Type_Ref type)
 	{
-		AST_Variable *v = new AST_Variable(name);
+		AST_Variable *v = new AST_Variable(name, type);
 		m_var_map.insert({name, v});
 		return v;
 	}

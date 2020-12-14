@@ -62,7 +62,22 @@
         "complex": "cpp",
         "list": "cpp",
         "unordered_set": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "shared_mutex": "cpp",
+        "any": "cpp",
+        "strstream": "cpp",
+        "cfenv": "cpp",
+        "charconv": "cpp",
+        "csetjmp": "cpp",
+        "csignal": "cpp",
+        "cuchar": "cpp",
+        "forward_list": "cpp",
+        "propagate_const": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "scoped_allocator": "cpp",
+        "typeindex": "cpp",
+        "valarray": "cpp"
     },
     "cSpell.enableFiletypes": [
         "shellscript"

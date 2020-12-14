@@ -9,10 +9,20 @@ list(REMOVE_ITEM SOURCE_FILES "main.cpp")
 add_library(dak_script ${SOURCE_FILES})
 
 
-# We need this directory, and users of our library will need it too
+find_package(LLVM REQUIRED CONFIG)
+
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+llvm_map_components_to_libnames(llvm_libs support core irreader)
+
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
+
 target_include_directories(dak_script PUBLIC "${PROJECT_SOURCE_DIR}/include")
 add_executable(compile "./main.cpp")
-target_link_libraries(compile PRIVATE dak_script)
+target_link_libraries(compile PRIVATE dak_script ${llvm_libs})
 
 
 install(TARGETS compile DESTINATION bin)
