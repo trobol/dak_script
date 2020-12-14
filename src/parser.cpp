@@ -43,7 +43,7 @@ void Parser::syntax_error(Token_Pos &pos, const char *fmt, ...)
 	va_end(argptr);
 }
 
-AST_Statement *Parser::parse_struct(AST_Type *type)
+AST_Statement *Parser::parse_struct(AST_Type_Ref type)
 {
 	AST_Struct_Block *block = new AST_Struct_Block(type);
 	block->parent = m_current_block;
@@ -61,7 +61,7 @@ AST_Statement *Parser::parse_type_statement()
 		return nullptr;
 	}
 	dak_std::string &name = m_token_module.get_identifier(tok);
-	AST_Type *type = m_current_block->add_type(name);
+	AST_Type_Ref type = m_current_block->add_type(name);
 	tok = pop_n_peek_token();
 	if (tok == TOKEN_KEYWORD_STRUCT)
 	{
@@ -88,6 +88,8 @@ AST_Statement *Parser::parse_next_statement()
 			case '}':
 				end_block();
 				return nullptr;
+			case TOKEN_KEYWORD_RETURN:
+				return parse_return_statement();
 			case TOKEN_EOF:
 				m_eof = true;
 				return nullptr;
@@ -151,6 +153,14 @@ AST_Statement *Parser::parse_next_statement()
 	return nullptr;
 }
 
+AST_Statement *Parser::parse_return_statement()
+{
+	pop_token();
+	AST_Expression *value = parse_next_expression();
+
+	return new AST_Return_Statement(value);
+}
+
 void Parser::end_block()
 {
 	if (m_current_block->parent != nullptr)
@@ -192,8 +202,9 @@ AST_Expression *Parser::parse_bop_expr() {}
 
 AST_Expression *Parser::parse_struct_construct_expr(dak_std::string &name)
 {
+	/*
 	// get type
-	AST_Type *type = m_current_block->find_type(name);
+	AST_Type_Ref type = m_current_block->find_type(name);
 
 	AST_Construct_Expression *struct_expr =
 	    new AST_Construct_Expression(type);
@@ -260,6 +271,7 @@ AST_Expression *Parser::parse_struct_construct_expr(dak_std::string &name)
 			     "exprected identifier, got %s",
 			     token_to_string(tok, &m_token_module));
 	}
+	*/
 	return nullptr;
 }
 
@@ -320,8 +332,12 @@ AST_Function *Parser::parse_func_dec()
 				return nullptr;
 			}
 			dak_std::string &param_name =
+			    m_token_module.get_identifier(name_tok);
+			dak_std::string &param_type =
 			    m_token_module.get_identifier(type_tok);
-			AST_Variable *param = func->add_parameter(param_name);
+
+			AST_Variable *param = func->add_parameter(
+			    param_name, m_current_block->find_type(param_type));
 
 			Token punct = pop_n_peek_token();
 			if (punct.type == TOKEN_TYPE_TOKEN)
@@ -349,7 +365,6 @@ AST_Function *Parser::parse_func_dec()
 					     token_type_to_name(punct.type));
 				return nullptr;
 			}
-			pop_token();
 		}
 	}
 	else
@@ -361,7 +376,7 @@ AST_Function *Parser::parse_func_dec()
 	if (tok.type == TOKEN_TYPE_IDENTIFIER)
 	{
 		dak_std::string &type_name = m_token_module.get_identifier(tok);
-		AST_Type *type = m_current_block->find_type(type_name);
+		AST_Type_Ref type = m_current_block->find_type(type_name);
 		func->add_return(type);
 	}
 	else if (tok == TOKEN_OPEN_PAREN)
@@ -375,7 +390,7 @@ AST_Function *Parser::parse_func_dec()
 			{
 				dak_std::string &type_name =
 				    m_token_module.get_identifier(tok);
-				AST_Type *type =
+				AST_Type_Ref type =
 				    m_current_block->find_type(type_name);
 				func->add_return(type);
 			}
@@ -555,26 +570,33 @@ AST_Expression *Parser::parse_next_expression()
 
 AST_Declaration_Statement *Parser::parse_dec_statement(dak_std::string &name)
 {
-	AST_Variable *var = m_current_block->add_variable(name);
+	AST_Variable *var = m_current_block->add_variable(name, AST_Type_Ref());
 	AST_Declaration_Statement *var_dec =
 	    new AST_Declaration_Statement(var, nullptr);
-	pop_token();
+
 	// type given
+
 	if (peek_token().type == TOKEN_TYPE_IDENTIFIER)
 	{
 
 		var->is_type_inferred = false;
+		Token &type_tok = pop_n_peek_token();
+		dak_std::string &type_name =
+		    m_token_module.get_identifier(type_tok);
 
-		// TODO type
-		pop_token();
+		var->type = m_current_block->find_type(type_name);
 	}
-
-	if (peek_token() == TOKEN_EQUALS)
+	else
 	{
 		var->is_type_inferred = true;
 	}
 
-	var_dec->value = parse_next_expression();
+	if (peek_token() == TOKEN_EQUALS)
+	{
+		pop_token();
+		var_dec->value = parse_next_expression();
+	}
+
 	return var_dec;
 }
 AST_Assign_Statement *Parser::parse_assign_statement(dak_std::string &name)

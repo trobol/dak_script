@@ -1,6 +1,7 @@
 #ifndef _DAK_SCRIPT_LLVM_IR_GENERATOR_H
 #define _DAK_SCRIPT_LLVM_IR_GENERATOR_H
 
+#include "../ast_type.h"
 #include "instruction.h"
 #include "module.h"
 #include "value.h"
@@ -8,6 +9,20 @@
 #include <dak_std/vector.h>
 #include <fstream>
 #include <initializer_list>
+#include <llvm/ADT/APFloat.h>
+#include <llvm/ADT/STLExtras.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Verifier.h>
+#include <map>
+#include <utility>
+#include <vector>
 
 namespace dak_script
 {
@@ -26,30 +41,65 @@ create the args
 
 */
 
+class AST_Variable;
+class AST_Function;
 class LLVM_IR_Generator
 {
-	// TODO settings
-	LLVM_IR_Module *m_ir_module;
-
-	LLVM_IR_Context *m_current_context;
-
 private:
-	void process_block(AST_Statement_Block *block);
-	LLVM_IR_Value proccess_statement(AST_Statement *statement);
+	// TODO: settings
+public:
+	llvm::Module *generate(Parsed_Module *, llvm::LLVMContext &);
+};
 
-	LLVM_IR_Value proccess_declaration(AST_Statement *statement);
+class LLVM_IR_Generator_Impl
+{
+private:
+	llvm::LLVMContext &m_context;
+	llvm::IRBuilder<> m_builder;
 
-	LLVM_IR_Value proccess_expression(AST_Expression *expr);
+	// TODO: right now all identifiers are global :/
 
-	LLVM_IR_Value proccess_bop_expression(AST_Expression *expr);
+	std::vector<std::pair<AST_Variable *, llvm::AllocaInst *>>
+	    m_variable_stack;
+	llvm::Module *m_ir_module;
+	Parsed_Module *m_module;
 
-	// void process_function(AST_Function *func);
+	llvm::Function *m_current_function;
+
+	LLVM_IR_Generator_Impl(Parsed_Module *module,
+			       llvm::LLVMContext &context)
+	    : m_module{module}, m_context{context},
+	      m_ir_module{new llvm::Module("main", m_context)},
+	      m_builder(m_context)
+	{
+	}
+
+	void process_statement_block(AST_Statement *statement);
+	void process_statement(AST_Statement *statement);
+
+	void process_assignment(AST_Statement *statement);
+	void process_function_block(AST_Statement *statement);
+
+	llvm::FunctionType *get_function_type(AST_Function *function);
+	llvm::Type *get_type(AST_Type_Ref type);
+
+	void process_return(AST_Statement *statement);
+	void process_declaration(AST_Statement *statement);
+
+	llvm::Value *process_expression(AST_Expression *expr);
+
+	llvm::Value *process_bop_expression(AST_Expression *expr);
+
+	llvm::Value *process_literal_expression(AST_Expression *expr);
+
+	llvm::Value *process_variable_expression(AST_Expression *expr);
+
+	llvm::AllocaInst *create_alloca_entry(llvm::Type *type,
+					      llvm::StringRef name);
 
 	void flatten_expression(dak_std::vector<AST_Expression *> &list,
 				AST_Expression *node);
-
-public:
-	LLVM_IR_Module *generate(Parsed_Module *);
+	friend class LLVM_IR_Generator;
 };
 
 } // namespace dak_script

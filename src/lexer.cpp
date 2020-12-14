@@ -28,9 +28,9 @@ Token Lexer::make_literal(double f)
 	return Token{TOKEN_TYPE_LITERAL, .index = (m_literals.size() - 1)};
 }
 
-Token Lexer::make_literal(long long int i)
+Token Lexer::make_literal(unsigned long i)
 {
-	m_literals.push_back(Token_Literal{LITERAL_TYPE_INT, .int_val = (i)});
+	m_literals.push_back(Token_Literal{LITERAL_TYPE_UINT, .uint_val = (i)});
 	return Token{TOKEN_TYPE_LITERAL, .index = (m_literals.size() - 1)};
 }
 
@@ -82,10 +82,12 @@ Token_Module Lexer::lex()
 	do
 	{
 		token = next();
-		if(!(token.type == TOKEN_TYPE_TOKEN && token.value == TOKEN_EMPTY)) {
+		if (!(token.type == TOKEN_TYPE_TOKEN &&
+		      token.value == TOKEN_EMPTY))
+		{
 			m_tokens.push_back(token);
 			m_positions.push_back(
-				Token_Pos{m_line_number, m_character_number});
+			    Token_Pos{m_line_number, m_character_number});
 		}
 	} while (token != TOKEN_EOF);
 
@@ -242,10 +244,11 @@ Token Lexer::parse_slash()
 		} while (!(c == '*' && peek_char(1) == '/'));
 		pop_char(2);
 		return token;
-	} else {
+	}
+	else
+	{
 		return make_token(TOKEN_SLASH);
 	}
-	
 }
 
 void Lexer::break_line()
@@ -363,7 +366,7 @@ Token Lexer::parse_hex_literal()
 {
 	pop_char(2);
 
-	long long int value = 0;
+	unsigned long value = 0;
 	while (true)
 	{
 		char c = peek_char();
@@ -397,7 +400,7 @@ Token Lexer::parse_binary_literal()
 {
 	pop_char(2);
 
-	long long int value = 0;
+	unsigned long value = 0;
 	while (true)
 	{
 		char c = peek_char();
@@ -426,8 +429,8 @@ Token Lexer::parse_decimal_literal()
 {
 	unsigned int integral_digits = 0;
 	unsigned int fractional_digits = 0;
-	long long int integral_value = 0;
-	long long int fractional_value = 0;
+	unsigned long integral_value = 0;
+	unsigned long fractional_value = 0;
 
 	while (true)
 	{

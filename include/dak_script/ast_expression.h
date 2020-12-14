@@ -2,6 +2,7 @@
 #define _AST_EXPRESSION_DAK_SCRIPT_H
 
 #include <dak_script/token.h>
+#include <dak_std/assert.h>
 #include <dak_std/string.h>
 #include <dak_std/vector.h>
 
@@ -17,7 +18,6 @@ enum AST_Expression_Type
 	AST_EXPRESSION_TYPE_UOP,
 	AST_EXPRESSION_TYPE_LITERAL,
 	AST_EXPRESSION_TYPE_PAREN,
-	AST_EXPRESSION_TYPE_VALUE,
 	AST_EXPRESSION_TYPE_CALL
 };
 struct AST_Expression
@@ -26,14 +26,16 @@ struct AST_Expression
 	AST_Expression(AST_Expression_Type t) : type{t} {}
 	virtual ~AST_Expression() {}
 };
+
 struct AST_Construct_Expression : public AST_Expression
 {
 	dak_std::vector<dak_std::string> properties;
 	dak_std::vector<AST_Expression *> values;
-	AST_Type *construct_type;
+	AST_Type_Struct_Data *construct_type;
 
-	AST_Construct_Expression(AST_Type *t)
-	    : AST_Expression(AST_EXPRESSION_TYPE_CONSTRUCT), construct_type{t}
+	AST_Construct_Expression(AST_Type_Ref t)
+	    : AST_Expression(AST_EXPRESSION_TYPE_CONSTRUCT), construct_type{
+								 t.get_struct()}
 	{
 	}
 };
@@ -123,6 +125,61 @@ struct AST_Call_Expression
 };
 
 void print_expression(AST_Expression *expr, int indent = 0);
+
+template <typename T>
+constexpr const AST_Expression_Type get_expression_type();
+
+template <typename T>
+constexpr T *static_cast_expression(AST_Expression *expr)
+{
+	_dak_assert(expr->type == get_expression_type<T>());
+	return static_cast<T *>(expr);
+}
+
+template <>
+constexpr const AST_Expression_Type
+get_expression_type<AST_Construct_Expression>()
+{
+	return AST_EXPRESSION_TYPE_CONSTRUCT;
+}
+
+template <>
+constexpr const AST_Expression_Type
+get_expression_type<AST_Variable_Expression>()
+{
+	return AST_EXPRESSION_TYPE_VARIABLE;
+}
+
+template <>
+constexpr const AST_Expression_Type get_expression_type<AST_BOP_Expression>()
+{
+	return AST_EXPRESSION_TYPE_BOP;
+}
+
+template <>
+constexpr const AST_Expression_Type get_expression_type<AST_UOP_Expression>()
+{
+	return AST_EXPRESSION_TYPE_UOP;
+}
+
+template <>
+constexpr const AST_Expression_Type
+get_expression_type<AST_Literal_Expression>()
+{
+	return AST_EXPRESSION_TYPE_LITERAL;
+}
+
+template <>
+constexpr const AST_Expression_Type get_expression_type<AST_Paren_Expression>()
+{
+	return AST_EXPRESSION_TYPE_PAREN;
+}
+
+template <>
+constexpr const AST_Expression_Type get_expression_type<AST_Call_Expression>()
+{
+	return AST_EXPRESSION_TYPE_CALL;
+}
 
 } // namespace dak_script
 
