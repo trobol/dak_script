@@ -6,7 +6,7 @@
 #else
 #include "debug_break.h"
 #define _dak_assert(v)                                                         \
-	if (!v)                                                                \
+	if (!(v))                                                              \
 		debug_break();
 #endif
 

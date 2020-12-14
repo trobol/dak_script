@@ -1,10 +1,13 @@
-func test_math(val: f32) f32 {
 
+func test_math(val: i64) i64 {
 
+val2 := 5 + val
 }
+
 
 //val2 := 10 + 5 + 23 / 10
 val3 := 10 + (5) + (23- 6) * ((14/10+2) - 5) + (3+(5*8))
+
 
 
 /*
@@ -61,26 +64,3 @@ array : []Test
 
 ptr = &e //get location
 
-
-
-/*
-
-    Block Comment
-    /*
-    Nested Block Comment
-    */
-
-*/nt
-    */
-
-*/
-
-*/mment
-    */
-
-*/nt
-    */
-
-*/
-
-*/

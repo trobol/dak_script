@@ -33,7 +33,7 @@ struct AST_Variable
 	dak_std::string name;
 	AST_Type_Ref type;
 
-	AST_Variable(dak_std::string &n) : name{n} {}
+	AST_Variable(dak_std::string &n, AST_Type_Ref t) : name{n}, type{t} {}
 };
 
 struct AST_Type
@@ -76,36 +76,38 @@ struct AST_Base_Block : public AST_Statement
 	AST_Base_Block *parent;
 
 	virtual AST_Variable *find_variable(dak_std::string &name) = 0;
-	virtual AST_Variable *add_variable(dak_std::string &name) = 0;
+	virtual AST_Variable *add_variable(dak_std::string &name,
+					   AST_Type_Ref type) = 0;
 
 	virtual AST_Function *add_function(dak_std::string &name) = 0;
 	virtual AST_Function *find_function(dak_std::string &name) = 0;
 
 	virtual void add_statement(AST_Statement *) = 0;
 
-	virtual AST_Type *add_type(dak_std::string &) = 0;
-	virtual AST_Type *find_type(dak_std::string &) = 0;
+	virtual AST_Type_Ref add_type(dak_std::string &) = 0;
+	virtual AST_Type_Ref find_type(dak_std::string &) = 0;
 };
 
 struct AST_Struct_Block : public AST_Base_Block
 {
 private:
-	AST_Type *m_type;
+	AST_Type_Struct_Data *m_type;
 
 public:
-	AST_Struct_Block(AST_Type *type)
-	    : AST_Base_Block{AST_STATEMENT_TYPE_STRUCT_BLOCK}, m_type{type}
+	AST_Struct_Block(AST_Type_Ref type)
+	    : AST_Base_Block{AST_STATEMENT_TYPE_STRUCT_BLOCK},
+	      m_type{type.get_struct()}
 	{
 	}
 	AST_Variable *find_variable(dak_std::string &name);
 
-	AST_Variable *add_variable(dak_std::string &name);
+	AST_Variable *add_variable(dak_std::string &name, AST_Type_Ref type);
 
 	AST_Function *find_function(dak_std::string &name);
 	AST_Function *add_function(dak_std::string &name);
 
-	AST_Type *find_type(dak_std::string &name);
-	AST_Type *add_type(dak_std::string &name);
+	AST_Type_Ref find_type(dak_std::string &name);
+	AST_Type_Ref add_type(dak_std::string &name);
 
 	void add_statement(AST_Statement *statement);
 };
@@ -121,8 +123,7 @@ private:
 	dak_std::vector<AST_Function *> m_functions;
 	std::unordered_map<dak_std::string, AST_Function *> m_function_map;
 
-	dak_std::vector<AST_Type *> m_types;
-	std::unordered_map<dak_std::string, AST_Type *> m_type_map;
+	AST_Type_Map m_type_map;
 
 public:
 	AST_Statement_Block()
@@ -130,20 +131,20 @@ public:
 	{
 	}
 	AST_Variable *find_variable(dak_std::string &name);
-	AST_Variable *add_variable(dak_std::string &name);
+	AST_Variable *add_variable(dak_std::string &name, AST_Type_Ref type);
 
 	AST_Function *find_function(dak_std::string &name);
 	AST_Function *add_function(dak_std::string &name);
 
-	AST_Type *add_type(dak_std::string &name);
-	AST_Type *find_type(dak_std::string &name);
+	AST_Type_Ref add_type(dak_std::string &name);
+	AST_Type_Ref find_type(dak_std::string &name);
 
 	void add_statement(AST_Statement *statement);
 
 	dak_std::vector<AST_Function *> &functions() { return m_functions; }
 	dak_std::vector<AST_Variable *> &variables() { return m_variables; }
 	dak_std::vector<AST_Statement *> &statements() { return m_statements; }
-	dak_std::vector<AST_Type *> &types() { return m_types; }
+
 	~AST_Statement_Block();
 };
 
@@ -152,13 +153,13 @@ struct AST_Function : public AST_Statement_Block
 
 	dak_std::string name;
 	dak_std::vector<AST_Variable *> parameters;
-	dak_std::vector<AST_Type *> returns;
+	dak_std::vector<AST_Type_Ref> returns;
 	AST_Function(dak_std::string &n) : name{n} {}
 	~AST_Function();
 
-	AST_Variable *add_parameter(dak_std::string &name);
+	AST_Variable *add_parameter(dak_std::string &name, AST_Type_Ref type);
 
-	void add_return(AST_Type *type) { returns.push_back(type); }
+	void add_return(AST_Type_Ref type) { returns.push_back(type); }
 };
 
 struct AST_IfElse_Statement : public AST_Statement

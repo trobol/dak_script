@@ -45,8 +45,6 @@ enum Token_Value : uint32_t
 	TOKEN_NUMBER,
 	TOKEN_STRING,
 
-	
-
 	TOKEN_PLUSEQUALS,
 	TOKEN_MINUSEQUALS,
 
@@ -64,7 +62,7 @@ enum Token_Value : uint32_t
 
 	TOKEN_KEYWORD_TRUE,
 	TOKEN_KEYWORD_FALSE,
-	
+
 	TOKEN_ERROR,
 
 };
@@ -97,7 +95,7 @@ struct Token
 enum Token_Literal_Type
 {
 	LITERAL_TYPE_FLOAT,
-	LITERAL_TYPE_INT,
+	LITERAL_TYPE_UINT,
 	LITERAL_TYPE_STRING,
 	LITERAL_TYPE_CHAR
 };
@@ -108,7 +106,7 @@ struct Token_Literal
 	union {
 		char char_val;
 		char *string_val;
-		long long int int_val;
+		unsigned long uint_val;
 		double float_val;
 	};
 };

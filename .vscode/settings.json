@@ -62,7 +62,8 @@
         "complex": "cpp",
         "list": "cpp",
         "unordered_set": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "shared_mutex": "cpp"
     },
     "cSpell.enableFiletypes": [
         "shellscript"

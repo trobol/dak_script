@@ -53,7 +53,7 @@ private:
 	AST_Expression *parse_uop_expr();
 
 	AST_Statement *parse_next_statement();
-	AST_Statement *parse_struct(AST_Type *);
+	AST_Statement *parse_struct(AST_Type_Ref);
 	AST_Statement *parse_type_statement();
 	AST_Declaration_Statement *parse_dec_statement(dak_std::string &);
 	AST_Assign_Statement *parse_assign_statement(dak_std::string &);

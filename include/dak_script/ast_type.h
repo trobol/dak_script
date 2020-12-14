@@ -22,6 +22,7 @@ enum AST_Type_Kind
 	TYPE_KIND_I8,
 	TYPE_KIND_I16,
 	TYPE_KIND_I32,
+	TYPE_KIND_I64,
 	TYPE_KIND_F32,
 	TYPE_KIND_F64
 };
@@ -73,6 +74,8 @@ public:
 		m_kind = r.m_kind;
 		mp_ptr = r.mp_ptr;
 	}
+
+	AST_Type_Kind get_kind() { return m_kind; }
 };
 
 class AST_Type_Map
@@ -84,7 +87,7 @@ class AST_Type_Map
 	std::unordered_map<dak_std::string, AST_Type_Ref> m_types;
 
 public:
-	AST_Type_Ref add_new(AST_Type_Kind kind)
+	AST_Type_Ref add_new(AST_Type_Kind kind, dak_std::string &name)
 	{
 		void *ptr = nullptr;
 		switch (kind)
@@ -120,15 +123,20 @@ public:
 			case TYPE_KIND_I8:
 			case TYPE_KIND_I16:
 			case TYPE_KIND_I32:
+			case TYPE_KIND_I64:
 			case TYPE_KIND_F32:
 			case TYPE_KIND_F64:
 				ptr = nullptr;
 				break;
 		}
-
-		return AST_Type_Ref(kind, ptr);
+		AST_Type_Ref t(kind, ptr);
+		if (ptr != nullptr)
+			m_types.insert({name, t}); // TODO: check for overlap
+		return t;
 	}
 };
+
+const char *get_ast_type_name(AST_Type_Ref ref);
 
 } // namespace dak_script
 

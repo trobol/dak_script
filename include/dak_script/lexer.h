@@ -51,7 +51,7 @@ private:
 
 	Token make_literal(char);
 	Token make_literal(double);
-	Token make_literal(long long int);
+	Token make_literal(unsigned long);
 	Token make_literal(char *);
 
 	Token next();

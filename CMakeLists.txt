@@ -1,6 +1,6 @@
 # https://cliutils.gitlab.io/modern-cmake/chapters/basics/structure.html
 # https://gitlab.com/CLIUtils/modern-cmake/-/blob/master/examples/extended-project/CMakeLists.txt
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.4.3)
 project(dak_script)
 
 
@@ -10,6 +10,8 @@ include(FetchContent)
 if(${CMAKE_VERSION} VERSION_LESS 3.14)
     include(cmake/add_FetchContent_MakeAvailable.cmake)
 endif()
+
+
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --save-temps")

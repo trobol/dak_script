@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
 				case LITERAL_TYPE_FLOAT:
 					output << l.float_val << ' ';
 					break;
-				case LITERAL_TYPE_INT:
-					output << l.int_val << ' ';
+				case LITERAL_TYPE_UINT:
+					output << l.uint_val << ' ';
 					break;
 				case LITERAL_TYPE_STRING:
 					output << l.string_val << ' ';
@@ -100,15 +100,22 @@ int main(int argc, char *argv[])
 
 	LLVM_IR_Generator generator;
 
-	LLVM_IR_Module *ir_module = generator.generate(parsed_module);
+	std::unique_ptr<llvm::LLVMContext> context =
+	    std::make_unique<llvm::LLVMContext>();
+	llvm::Module *ir_module = generator.generate(parsed_module, *context);
 
-	// will hold settings for serialization
-	// how to deal with metadata etc
-	LLVM_IR_Serializer serializer;
+	std::cout << "\n === LLVM IR OUTPUT === \n\n";
+	ir_module->print(llvm::errs(), nullptr);
+	/*
+		// will hold settings for serialization
+		// how to deal with metadata etc
+		LLVM_IR_Serializer serializer;
 
-	serializer.serialize(ir_module);
+		serializer.serialize(ir_module);
+	*/
 
 	delete ir_module;
+
 	delete parsed_module;
 	dak_std::error err_mmf = file.unmap();
 
@@ -151,14 +158,17 @@ void print_module(Parsed_Module *parsed_module)
 		printf("	%s ( ", func->name);
 		for (AST_Variable *p : func->parameters)
 		{
-			printf("%s, ", p->name);
+			printf("%s : %s, ", p->name,
+			       get_ast_type_name(p->type));
 		}
 		printf(") (\n");
 	}
 
+	/*
 	printf("Types:\n");
 	for (AST_Type *type : parsed_module->top_block->types())
 	{
 		printf("	%s\n", type->name);
 	}
+	*/
 }

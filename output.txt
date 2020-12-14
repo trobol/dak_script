@@ -1,7 +1,9 @@
-TOKEN_KEYWORD_FUNC I_test_math ( I_val : I_f32 ) I_f32 { 
 
+TOKEN_KEYWORD_FUNC I_test_math ( I_val : I_i64 ) I_i64 { 
 
+I_val2 : = 5 + I_val 
 } 
+
 
 
 
@@ -9,16 +11,4 @@ I_val3 : = 0 + ( 5 ) + ( 3 - 6 ) * ( ( 4 / 0 + 2 ) - 5 ) + ( 3 + ( 5 * 8 ) )
 
 
 
-
-
-* / 
-
-* / I_mment 
-* / 
-
-* / I_nt 
-* / 
-
-* / 
-
-* / TOKEN_EOF 
+TOKEN_EOF 
