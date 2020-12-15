@@ -20,6 +20,7 @@ enum AST_Statement_Type
 	AST_STATEMENT_TYPE_IF_ELSE,
 	AST_STATEMENT_TYPE_SWITCH,
 	AST_STATEMENT_TYPE_ASSIGN,
+	AST_STATEMENT_TYPE_RETURN,
 };
 
 struct AST_Declaration_Statement;
@@ -64,6 +65,15 @@ struct AST_Statement
 			buffer[i] == '\t';
 		}
 		printf("%s", buffer);
+	}
+};
+
+struct AST_Return_Statement : public AST_Statement
+{
+	AST_Expression *value;
+	AST_Return_Statement(AST_Expression *v)
+	    : AST_Statement(AST_STATEMENT_TYPE_RETURN), value{v}
+	{
 	}
 };
 

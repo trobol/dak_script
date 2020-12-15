@@ -58,6 +58,7 @@ private:
 	AST_Declaration_Statement *parse_dec_statement(dak_std::string &);
 	AST_Assign_Statement *parse_assign_statement(dak_std::string &);
 	AST_Statement *parse_void_fuc_statement(dak_std::string &);
+	AST_Statement *parse_return_statement();
 
 	AST_Function *parse_func_dec();
 

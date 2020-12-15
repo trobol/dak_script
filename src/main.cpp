@@ -106,6 +106,13 @@ int main(int argc, char *argv[])
 
 	std::cout << "\n === LLVM IR OUTPUT === \n\n";
 	ir_module->print(llvm::errs(), nullptr);
+
+	dak_std::string out_path = "output.ld";
+	std::error_code ec;
+	llvm::raw_fd_ostream ir_out(out_path.data(), ec);
+
+	ir_module->print(ir_out, nullptr);
+	ir_out.close();
 	/*
 		// will hold settings for serialization
 		// how to deal with metadata etc
@@ -115,7 +122,6 @@ int main(int argc, char *argv[])
 	*/
 
 	delete ir_module;
-
 	delete parsed_module;
 	dak_std::error err_mmf = file.unmap();
 
@@ -138,19 +144,6 @@ int main(int argc, char *argv[])
 void print_module(Parsed_Module *parsed_module)
 {
 
-	printf("Statements: %u\n",
-	       parsed_module->top_block->statements().size());
-	for (AST_Statement *s : parsed_module->top_block->statements())
-	{
-		s->print();
-	}
-
-	printf("Variables:\n");
-	for (AST_Variable *var : parsed_module->top_block->variables())
-	{
-		printf("	%s\n", var->name);
-	}
-
 	printf("Functions:\n");
 	for (AST_Function *func : parsed_module->top_block->functions())
 	{
@@ -162,6 +155,18 @@ void print_module(Parsed_Module *parsed_module)
 			       get_ast_type_name(p->type));
 		}
 		printf(") (\n");
+
+		printf("Statements: %u\n", func->statements().size());
+		for (AST_Statement *s : func->statements())
+		{
+			s->print();
+		}
+
+		printf("Variables:\n");
+		for (AST_Variable *var : func->variables())
+		{
+			printf("	%s\n", var->name);
+		}
 	}
 
 	/*

@@ -83,6 +83,7 @@ private:
 	llvm::FunctionType *get_function_type(AST_Function *function);
 	llvm::Type *get_type(AST_Type_Ref type);
 
+	void process_return(AST_Statement *statement);
 	void process_declaration(AST_Statement *statement);
 
 	llvm::Value *process_expression(AST_Expression *expr);
@@ -93,7 +94,8 @@ private:
 
 	llvm::Value *process_variable_expression(AST_Expression *expr);
 
-	// void process_function(AST_Function *func);
+	llvm::AllocaInst *create_alloca_entry(llvm::Type *type,
+					      llvm::StringRef name);
 
 	void flatten_expression(dak_std::vector<AST_Expression *> &list,
 				AST_Expression *node);

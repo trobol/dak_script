@@ -69,8 +69,20 @@ void LLVM_IR_Generator_Impl::process_statement_block(AST_Statement *statement)
 	}
 }
 
+llvm::AllocaInst *
+LLVM_IR_Generator_Impl::create_alloca_entry(llvm::Type *type,
+					    llvm::StringRef name)
+{
+	llvm::IRBuilder<> tmp_builder(
+	    &m_current_function->getEntryBlock(),
+	    m_current_function->getEntryBlock().begin());
+	return tmp_builder.CreateAlloca(type, nullptr, name);
+}
+
 void LLVM_IR_Generator_Impl::process_function_block(AST_Statement *statement)
 {
+	llvm::Function *parent_function = m_current_function;
+
 	AST_Function *func_statement = static_cast<AST_Function *>(statement);
 	AST_Statement_Block *block_statement =
 	    static_cast<AST_Statement_Block *>(statement);
@@ -80,15 +92,15 @@ void LLVM_IR_Generator_Impl::process_function_block(AST_Statement *statement)
 	llvm::Function *func =
 	    llvm::Function::Create(func_type, llvm::Function::ExternalLinkage,
 				   func_statement->name.data(), m_ir_module);
-
+	m_current_function = func;
+	llvm::BasicBlock *basic_block =
+	    llvm::BasicBlock::Create(m_context, "entry", func);
+	m_builder.SetInsertPoint(basic_block);
 	// Set names for all arguments.
 	unsigned i = 0;
 	for (auto &arg : func->args())
 		arg.setName(func_statement->parameters[i++]->name.data());
 
-	llvm::BasicBlock *basic_block =
-	    llvm::BasicBlock::Create(m_context, "entry", func);
-	m_builder.SetInsertPoint(basic_block);
 	// record stack index
 
 	// create stack space for arguments
@@ -96,16 +108,13 @@ void LLVM_IR_Generator_Impl::process_function_block(AST_Statement *statement)
 	{
 		AST_Variable *var = func_statement->parameters[i];
 		llvm::Argument *param = func->getArg(i);
-		llvm::AllocaInst *alloca = m_builder.CreateAlloca(
-		    param->getType(), 0, param->getName());
+		llvm::AllocaInst *alloca =
+		    create_alloca_entry(param->getType(), param->getName());
 		// Store the initial value into the alloca.
 		m_builder.CreateStore(param, alloca);
 
 		m_variable_stack.push_back({var, alloca});
 	}
-
-	llvm::Function *parent_function = m_current_function;
-	m_current_function = func;
 
 	process_statement_block(statement);
 
@@ -179,10 +188,21 @@ void LLVM_IR_Generator_Impl::process_statement(AST_Statement *statement)
 		case AST_STATEMENT_TYPE_FUNCTION_BLOCK:
 			process_function_block(statement);
 			break;
+		case AST_STATEMENT_TYPE_RETURN:
+			process_return(statement);
+			break;
 		default:
 			// TODO ERROR
 			break;
 	}
+}
+
+void LLVM_IR_Generator_Impl::process_return(AST_Statement *statement)
+{
+	AST_Return_Statement *ret =
+	    static_cast<AST_Return_Statement *>(statement);
+	llvm::Value *val = process_expression(ret->value);
+	m_builder.CreateRet(val);
 }
 
 void LLVM_IR_Generator_Impl::process_declaration(AST_Statement *statement)
@@ -195,10 +215,9 @@ void LLVM_IR_Generator_Impl::process_declaration(AST_Statement *statement)
 	AST_Variable *var = decl_statement->variable;
 
 	llvm::Value *val = process_expression(decl_statement->value);
-	m_builder.Insert(val);
 
 	llvm::AllocaInst *alloca =
-	    m_builder.CreateAlloca(val->getType(), 0, val->getName());
+	    create_alloca_entry(val->getType(), val->getName());
 	// Store the initial value into the alloca.
 	m_builder.CreateStore(val, alloca);
 	m_variable_stack.push_back({var, alloca});
@@ -240,9 +259,11 @@ LLVM_IR_Generator_Impl::process_variable_expression(AST_Expression *expr)
 	for (auto end = &m_variable_stack.back();
 	     end >= &m_variable_stack.front(); end--)
 	{
-		if (end->first == var)
+		if ((size_t)end->first == (size_t)var)
 		{
 			alloc = end->second;
+			std::cout << var->name << ' ' << end->first->name
+				  << '\n';
 			break;
 		}
 	}

@@ -88,6 +88,8 @@ AST_Statement *Parser::parse_next_statement()
 			case '}':
 				end_block();
 				return nullptr;
+			case TOKEN_KEYWORD_RETURN:
+				return parse_return_statement();
 			case TOKEN_EOF:
 				m_eof = true;
 				return nullptr;
@@ -149,6 +151,14 @@ AST_Statement *Parser::parse_next_statement()
 		// TODO SYNTAX ERROR
 	}
 	return nullptr;
+}
+
+AST_Statement *Parser::parse_return_statement()
+{
+	pop_token();
+	AST_Expression *value = parse_next_expression();
+
+	return new AST_Return_Statement(value);
 }
 
 void Parser::end_block()
@@ -355,7 +365,6 @@ AST_Function *Parser::parse_func_dec()
 					     token_type_to_name(punct.type));
 				return nullptr;
 			}
-			pop_token();
 		}
 	}
 	else
@@ -564,7 +573,6 @@ AST_Declaration_Statement *Parser::parse_dec_statement(dak_std::string &name)
 	AST_Variable *var = m_current_block->add_variable(name, AST_Type_Ref());
 	AST_Declaration_Statement *var_dec =
 	    new AST_Declaration_Statement(var, nullptr);
-	pop_token();
 
 	// type given
 
@@ -578,13 +586,17 @@ AST_Declaration_Statement *Parser::parse_dec_statement(dak_std::string &name)
 
 		var->type = m_current_block->find_type(type_name);
 	}
-
-	if (peek_token() == TOKEN_EQUALS)
+	else
 	{
 		var->is_type_inferred = true;
 	}
 
-	var_dec->value = parse_next_expression();
+	if (peek_token() == TOKEN_EQUALS)
+	{
+		pop_token();
+		var_dec->value = parse_next_expression();
+	}
+
 	return var_dec;
 }
 AST_Assign_Statement *Parser::parse_assign_statement(dak_std::string &name)
