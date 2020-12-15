@@ -3,7 +3,7 @@
 
 #include "expectations.h"
 
-using namespace dak::script;
+using namespace dak_script;
 
 TEST_CASE("file descriptor", "[file_descriptor]")
 {

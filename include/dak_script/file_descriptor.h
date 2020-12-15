@@ -1,26 +1,39 @@
 #ifndef _DAK_SCRIPT_FILE_HANDLE_H
 #define _DAK_SCRIPT_FILE_HANDLE_H
-#include <string>
+#include <dak_std/string.h>
 
-namespace dak::script
+namespace dak_script
 {
 
 enum file_mode
 {
-	READ_ONLY = 1,
-	WRITE_ONLY = 2,
-	READ_WRITE = 3
+	READ_ONLY = 00,
+	WRITE_ONLY = 01,
+	READ_WRITE = 02
 };
 
-typedef int file_descriptor;
+class file_descriptor
+{
+private:
+	int m_id;
+	file_descriptor(int);
 
-file_descriptor file_open(std::string path, file_mode mode = READ_ONLY);
-file_descriptor file_open(const char *path, file_mode mode = READ_ONLY);
+public:
+	file_descriptor(const file_descriptor &) = delete;
 
-int file_close(file_descriptor fd);
+	file_descriptor(file_descriptor &&);
 
-size_t len(file_descriptor fd);
+	int close();
 
-} // namespace dak::script
+	size_t size() const;
+
+	static file_descriptor open(const dak_std::string &path,
+				    file_mode mode);
+	static file_descriptor open(dak_std::string &&path, file_mode mode);
+
+	int id() const { return m_id; }
+};
+
+} // namespace dak_script
 
 #endif

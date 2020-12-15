@@ -8,14 +8,20 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/tests/dak_script_test",
-            "args": [],
+            "program": "${workspaceFolder}/build/src/compile",
+            "args": [
+                "./example_file.dak"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "environment": [
+                {
+                    "name": "MALLOC_CHECK_",
+                    "value": "2"
+                }
+            ],
             "externalConsole": false,
             "MIMode": "gdb",
-            
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
