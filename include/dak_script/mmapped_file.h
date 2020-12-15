@@ -2,34 +2,24 @@
 #define _DAK_SCRIPT_MAPPED_FILE_H
 
 #include <dak_script/file_descriptor.h>
-#include <dak_std/error.h>
-#include <dak_std/string.h>
+#include <string>
 
-namespace dak_script
+namespace dak::script
 {
 
-class mmapped_file
+struct mmapped_file
 {
-private:
-	const char *m_data;
-	size_t m_size;
-	file_descriptor &m_fd;
-
-	mmapped_file(const mmapped_file &);
-
-	mmapped_file(file_descriptor &fd, size_t size, const char *data);
-
-public:
-	static mmapped_file map(file_descriptor &fd);
-	static mmapped_file map(file_descriptor &fd, size_t size);
-
-	size_t size() const { return m_size; }
-	const char *data() const { return m_data; }
-	dak_std::error unmap();
-
-	~mmapped_file();
+	file_descriptor fd;
+	size_t length;
+	const char *contents;
+	operator const char *() { return contents; }
 };
 
-} // namespace dak_script
+mmapped_file map_file(file_descriptor fd);
+mmapped_file map_file(file_descriptor fd, size_t length);
+
+int unmap_file(mmapped_file file);
+
+} // namespace dak::script
 
 #endif

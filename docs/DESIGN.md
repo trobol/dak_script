@@ -36,8 +36,3 @@ case
 ## Component
     list<Type>
     functions
-
-
-# Parser
-
-Statement = top 

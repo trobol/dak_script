@@ -4,7 +4,7 @@
 
 #include "expectations.h"
 
-using namespace dak_script;
+using namespace dak::script;
 
 TEST_CASE("mmapped file", "[mmapped_file]")
 {
